@@ -5424,7 +5424,7 @@ namespace X11
 				while (y0 >= x0)
 				{
 					DrawFillLine_SIMD(x - y0, x + y0, y - x0, p);
-					if (x0 > 0)	DrawFillLine_SIMD(x - y0, x + y0, y + x0, p);
+					if (x0 > 0)	DrawFillLine_SIMD(x - y0, x + y0, y + x0, p); // John Galvin added missing 'p'
 
 					if (d < 0)
 						d += 4 * x0++ + 6;
@@ -5432,8 +5432,8 @@ namespace X11
 					{
 						if (x0 != y0)
 						{
-							DrawFillLine_SIMD(x - x0, x + x0, y - y0, p);
-							DrawFillLine_SIMD(x - x0, x + x0, y + y0, p);
+							DrawFillLine_SIMD(x - x0, x + x0, y - y0, p); // John Galvin added missing 'p'
+							DrawFillLine_SIMD(x - x0, x + x0, y + y0, p); // John Galvin added missing 'p'
 						}
 						d += 4 * (x0++ - y0--) + 10;
 					}
@@ -5552,7 +5552,7 @@ namespace X11
 				if (minx > t2x) minx = t2x;
 				if (maxx < t1x) maxx = t1x;
 				if (maxx < t2x) maxx = t2x;
-				DrawFillLine_SIMD(minx, maxx, y, p); // Draw line from min to max points found on the y using SIMD
+				DrawFillLine_SIMD(minx, maxx, y, p); // Draw line from min to max points found on the y using SIMD, // John Galvin added missing 'p'
 				// Now increase y
 				if (!changed1) t1x += signx1;
 				t1x += t1xp;
@@ -5611,7 +5611,7 @@ namespace X11
 				if (minx > t2x) minx = t2x;
 				if (maxx < t1x) maxx = t1x;
 				if (maxx < t2x) maxx = t2x;
-				DrawFillLine_SIMD(minx, maxx, y, p); // Draw line from min to max points found on the y using SIMD
+				DrawFillLine_SIMD(minx, maxx, y, p); // Draw line from min to max points found on the y using SIMD. // John Galvin added missing 'p'
 				if (!changed1) t1x += signx1;
 				t1x += t1xp;
 				if (!changed2) t2x += signx2;
