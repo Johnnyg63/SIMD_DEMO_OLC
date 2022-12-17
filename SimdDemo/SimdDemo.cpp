@@ -28,6 +28,11 @@ public:
 
 	/* Sprites */
 	olc::Sprite* sprMrIcey = nullptr;
+	olc::Sprite* sprMrSmiley = nullptr;
+	olc::Sprite* sprSpriteSheet = nullptr;
+	olc::Sprite* sprBody3D = nullptr;
+	olc::Sprite* sprFace1 = nullptr;
+	olc::Sprite* sprFace2 = nullptr;
 	olc::Sprite* sprBackGround = nullptr;
 
 	/* END Sprites*/
@@ -57,6 +62,27 @@ public:
 		sprMrIcey->setInsturctionSet(sprMrIcey->getInsturctionSet());
 		sprMrIcey->setStoreSubSprites(true);
 		nCurrentSIMDOption = sprMrIcey->getInsturctionSet();
+
+		sprMrSmiley = new olc::Sprite("./assets/images/CubeEnemuHaHaHa.png");
+		sprMrSmiley->setInsturctionSet(sprMrSmiley->getInsturctionSet());
+		sprMrSmiley->setStoreSubSprites(true);
+
+		sprSpriteSheet = new olc::Sprite("./assets/images/SpriteSheet.png");
+		sprSpriteSheet->setInsturctionSet(sprSpriteSheet->getInsturctionSet());
+		sprSpriteSheet->setStoreSubSprites(true);
+
+		sprBody3D = new olc::Sprite("./assets/images/Body3D.png");
+		sprBody3D->setInsturctionSet(sprBody3D->getInsturctionSet());
+		sprBody3D->setStoreSubSprites(true);
+
+		// Note we took the instruction set from the sprBody3D, we will be merging these later
+		sprFace1 = new olc::Sprite("./assets/images/Face1.png");
+		sprFace1->setInsturctionSet(sprBody3D->getInsturctionSet());
+		sprFace1->setStoreSubSprites(sprBody3D->getStoreSubSprites());
+
+		sprFace2 = new olc::Sprite("./assets/images/Face2.png");
+		sprFace2->setInsturctionSet(sprBody3D->getInsturctionSet());
+		sprFace2->setStoreSubSprites(sprBody3D->getStoreSubSprites());
 
 		sprBackGround = new olc::Sprite("./assets/images/ExampleBG1.png");
 		sprMrIcey->setInsturctionSet(sprMrIcey->getInsturctionSet());
@@ -109,6 +135,7 @@ public:
 		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
 		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
 		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
+		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
 		EnableLayer(nLayerDrawSprite, true);
 
 		/*------- Level Partial Sprites 6 ------*/
@@ -165,6 +192,7 @@ public:
 		DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
 		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
 		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
+		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
 		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
 
 		//
@@ -172,7 +200,15 @@ public:
 		Clear_SIMD(olc::BLANK);
 		DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
 		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 2, olc::Sprite::HORIZ);
+		DrawPartialSprite_SIMD({ 700, 100 }, sprSpriteSheet, { 0, 0 }, { 150,150 }, 1, olc::Sprite::NONE);
+		DrawPartialSprite_SIMD({ 850, 100 }, sprSpriteSheet, { 150, 0 }, { 100,150 }, 1, olc::Sprite::HORIZ);
+		DrawPartialSprite_SIMD({ 950, 120 }, sprSpriteSheet, { 250, 0 }, { 100,150 }, 1, olc::Sprite::VERT);
 
+		// merge!!
+		SetDrawTarget(nLayerDrawMergeSprite);
+		Clear_SIMD(olc::BLANK);
+		// We need to merge the face1 into the Body3D
+		// coming soon!
 
 		if (GetKey(olc::Key::E).bPressed)
 		{

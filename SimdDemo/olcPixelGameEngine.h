@@ -2503,6 +2503,10 @@ namespace X11
 
 		/*--------------------------- SIMD Instruction set For Sprites John Galvin -------------------------------------*/
 
+		olc::Sprite* Sprite::Duplicate_SIMD()
+		{
+			return Duplicate();
+		}
 
 		olc::Sprite* Sprite::Duplicate_SIMD(olc::Sprite::Flip flip)
 		{
