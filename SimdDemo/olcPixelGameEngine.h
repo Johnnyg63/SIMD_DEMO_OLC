@@ -2713,7 +2713,7 @@ namespace X11
 				nVecRead = nVecRLen;
 				for (int y = 1; y < height; y++)
 				{
-					nVecRead = (y * width) + 0;
+					nVecRead = (y * width) -8;
 					for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += -8, nVecTarget += 8)
 					{
 						_vecRead = _mm256_load_ps((const float*)((olc::Pixel*)pColData.data() + nVecRead));

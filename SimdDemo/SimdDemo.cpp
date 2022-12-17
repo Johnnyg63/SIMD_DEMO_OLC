@@ -171,8 +171,8 @@ public:
 		SetDrawTarget(nLayerDrawPartialSprite);
 		Clear_SIMD(olc::BLANK);
 		DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
-		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::HORIZ);
-		DrawPartialSprite_SIMD({ 300, 350 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::VERT);
+		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 2, olc::Sprite::HORIZ);
+
 
 		if (GetKey(olc::Key::E).bPressed)
 		{
@@ -206,9 +206,6 @@ public:
 				
 			}
 		}
-
-
-
 
 
 		// Draw Messages
