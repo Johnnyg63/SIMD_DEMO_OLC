@@ -15,9 +15,14 @@ public:
 		sAppName = "SIMD INSTRUCTION SET DEMO";
 	}
 
+	/* Vectors */
+	std::vector<std::string> vecMessages;
+	/* END Vectors*/
+
 	/* Vars */
 	int nMapWidth = 0;	// Map Width
 	int nMapHeight = 0; // Map Height 
+	olc::Sprite::SIMD_INSTRUCTON_OPTION nCurrentSIMDOption;
 
 	/* End Vars */
 
@@ -51,10 +56,11 @@ public:
 		sprMrIcey = new olc::Sprite("./assets/images/runsmall.png");
 		sprMrIcey->setInsturctionSet(sprMrIcey->getInsturctionSet());
 		sprMrIcey->setStoreSubSprites(true);
+		nCurrentSIMDOption = sprMrIcey->getInsturctionSet();
 
 		sprBackGround = new olc::Sprite("./assets/images/ExampleBG1.png");
 		sprMrIcey->setInsturctionSet(sprMrIcey->getInsturctionSet());
-		sprMrIcey->setStoreSubSprites(false);
+		sprMrIcey->setStoreSubSprites(true);
 		/*--- END Sprites ---*/
 
 
@@ -76,21 +82,21 @@ public:
 		nLayerCircle = CreateLayer();
 		SetDrawTarget(nLayerCircle);
 		Clear_SIMD(olc::BLANK);
-		FillCircle_SIMD({ 50, 50 }, 25, olc::GREEN);
+		FillCircle_SIMD({ 50, 110 }, 25, olc::GREEN);
 		EnableLayer(nLayerCircle, true);
 
 		/*------- Level Rectangles 4 ------*/
 		nLayerRect = CreateLayer();
 		SetDrawTarget(nLayerRect);
 		Clear_SIMD(olc::BLANK);
-		FillRect_SIMD({ 25, 100 }, { 50, 50 }, olc::RED);
+		FillRect_SIMD({ 25, 160 }, { 50, 50 }, olc::RED);
 		EnableLayer(nLayerRect, true);
 
 		/*------- Level Triangles 5 ------*/
 		nLayerRect = CreateLayer();
 		SetDrawTarget(nLayerRect);
 		Clear_SIMD(olc::BLANK);
-		FillTriangle_SIMD({ 50, 175 }, { 25, 225 }, { 75, 225 }, olc::YELLOW);
+		FillTriangle_SIMD({ 50, 235 }, { 25, 285 }, { 75, 285 }, olc::YELLOW);
 		EnableLayer(nLayerRect, true);
 
 
@@ -98,8 +104,10 @@ public:
 		nLayerDrawSprite = CreateLayer();
 		SetDrawTarget(nLayerDrawSprite);
 		Clear_SIMD(olc::BLANK);
-		DrawSprite_SIMD({ 100, 25 }, sprMrIcey, 1, olc::Sprite::NONE);
+		DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
+		DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
 		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
+		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
 		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
 		EnableLayer(nLayerDrawSprite, true);
 
@@ -107,7 +115,7 @@ public:
 		nLayerDrawPartialSprite = CreateLayer();
 		SetDrawTarget(nLayerDrawPartialSprite);
 		Clear_SIMD(olc::BLANK);
-		DrawPartialSprite_SIMD({ 300, 25 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
+		DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
 		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::HORIZ);
 		DrawPartialSprite_SIMD({ 300, 350 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::VERT);
 		
@@ -144,13 +152,93 @@ public:
 		SetDrawTarget(nLayerMessages);
 		Clear_SIMD(olc::BLANK);
 
-		// Draw the background
-		//SetDrawTarget(nLayerBackGround);
-		//Clear_SIMD(olc::BLUE);
-		//DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
+		// Clear the nLayerMessages
+		SetDrawTarget(nLayerMessages);
+		Clear_SIMD(olc::BLANK);
+		vecMessages.clear();
+		vecMessages.push_back("Press E to Enable/Disable Store Sub Spites, Press S to Enable/Disable SIMD");
+
+		//
+		SetDrawTarget(nLayerDrawSprite);
+		Clear_SIMD(olc::BLANK);
+		DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
+		DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
+		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
+		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
+		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
+
+		//
+		SetDrawTarget(nLayerDrawPartialSprite);
+		Clear_SIMD(olc::BLANK);
+		DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
+		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::HORIZ);
+		DrawPartialSprite_SIMD({ 300, 350 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::VERT);
+
+		if (GetKey(olc::Key::E).bPressed)
+		{
+			if (sprMrIcey->getStoreSubSprites())
+			{
+				sprMrIcey->setStoreSubSprites(false);
+				sprBackGround->setStoreSubSprites(false);
+				
+			}
+			else
+			{
+				sprMrIcey->setStoreSubSprites(true);
+				sprBackGround->setStoreSubSprites(true);
+				
+			}
+		}
+
+		if (GetKey(olc::Key::S).bPressed)
+		{
+			if (sprMrIcey->getInsturctionSet() == sprMrIcey->SIMD_NONE)
+			{
+				sprMrIcey->setInsturctionSet(nCurrentSIMDOption);
+				sprBackGround->setInsturctionSet(nCurrentSIMDOption);
+				
+			}
+			else
+			{
+
+				sprMrIcey->setInsturctionSet(sprMrIcey->SIMD_NONE);
+				sprBackGround->setInsturctionSet(sprMrIcey->SIMD_NONE);
+				
+			}
+		}
 
 
 
+
+
+		// Draw Messages
+		SetDrawTarget(nLayerMessages);
+		Clear_SIMD(olc::BLANK);
+
+		if (sprMrIcey->getStoreSubSprites())
+		{
+			vecMessages.push_back("Store Sub Sprites ENABLED");
+		}
+		else
+		{
+			vecMessages.push_back("Store Sub Sprites DISABLED");
+		}
+
+		if (sprMrIcey->getInsturctionSet() == sprMrIcey->SIMD_NONE)
+		{
+			vecMessages.push_back("SIMD DISABLED");
+		}
+		else
+		{
+			vecMessages.push_back("SIMD ENABLED");
+		}
+
+		int nStep = 20;
+		for (auto& s : vecMessages)
+		{
+			DrawString(20, nStep, s);
+			nStep += 20;
+		}
 
 		return true;
 	}

@@ -3158,7 +3158,7 @@ namespace X11
 					break; // Break if we reached the end of the read vector
 				}
 				if (nVecTarget > nVecTLen) {
-					break; // break if we reached the end of the traget vector
+					break; // break if we reached the end of the target vector
 				}
 
 				//Get the next position of the read vector
@@ -3746,9 +3746,21 @@ namespace X11
 
 			}
 
+
 			if (flip & olc::Sprite::Flip::HORIZ)
 			{
-				nVecRead = nVecRLen;
+				int nOffSet = ex % 4;
+
+				if (nOffSet > 0)
+				{
+					// we need to work out what is the next muliple of 8 pixels
+					// Example: vSize.x = 270 
+					nOffSet = (ex / 4) + 1; // 270 / 8 = 33. + 1 = 34
+					nOffSet = (nOffSet * 4); // 34 * 8 = 272
+					nOffSet = nOffSet - ex; // therefore the offset is 2
+
+				}
+
 				if (nYStart == 0) nYStart++;
 				for (int y = nYStart; y < height; y++, nTargetY++)
 				{
@@ -3757,6 +3769,7 @@ namespace X11
 					pTargetVector += nVecTarget;
 
 					nVecRead = (y * width) - nXStart;
+					nVecRead += -4;
 					for (int x = nXStart; x < ex; x += 4, pTargetVector += 4, nVecRead += -4, nVecTarget += 4)
 					{
 						_sx = _mm_set_epi32(x + 3, x + 2, x + 1, x);
@@ -3772,6 +3785,7 @@ namespace X11
 					}
 
 					pTargetVector -= nVecTarget; // reset pointer
+					nVecTarget -= nOffSet;
 
 
 				}
@@ -3898,7 +3912,18 @@ namespace X11
 			// If Horiz
 			if (flip & olc::Sprite::Flip::HORIZ)
 			{
-				nVecRead = nVecRLen;
+				int nOffSet = ex % 8;
+
+				if (nOffSet > 0)
+				{
+					// we need to work out what is the next muliple of 8 pixels
+					// Example: vSize.x = 270 
+					nOffSet = (ex / 8) + 1; // 270 / 8 = 33. + 1 = 34
+					nOffSet = (nOffSet * 8); // 34 * 8 = 272
+					nOffSet = nOffSet - ex; // therefore the offset is 2
+
+				}
+
 				if (nYStart == 0) nYStart++;
 				for (int y = nYStart; y < nHeight; y++, nTargetY++)
 				{
@@ -3908,6 +3933,7 @@ namespace X11
 					pTargetVector += nVecTarget;
 
 					nVecRead = (y * width) - nXStart;
+					nVecRead += -8;
 					for (int x = nXStart; x < ex; x += 8, pTargetVector += 8, nVecRead += -8, nVecTarget += 8)
 					{
 						_sx = _mm256_set_epi32(x + 7, x + 6, x + 5, x + 4, x + 3, x + 2, x + 1, x);
@@ -3920,7 +3946,7 @@ namespace X11
 					}
 
 					pTargetVector -= nVecTarget; // reset pointer
-
+					nVecTarget -= nOffSet;
 
 				}
 			}
@@ -4035,9 +4061,23 @@ namespace X11
 				}
 			}
 
+			
 			if (flip & olc::Sprite::Flip::HORIZ)
 			{
-				nVecRead = nVecRLen;
+
+				int nOffSet = ex % 16;
+
+				if (nOffSet > 0)
+				{
+					// we need to work out what is the next muliple of 8 pixels
+					// Example: vSize.x = 270 
+					nOffSet = (ex / 16) + 1; // 270 / 8 = 33. + 1 = 34
+					nOffSet = (nOffSet * 16); // 34 * 8 = 272
+					nOffSet = nOffSet - ex; // therefore the offset is 2
+
+				}
+
+
 				if (nYStart == 0) nYStart++;
 				for (int y = nYStart; y < height; y++, nTargetY++)
 				{
@@ -4046,6 +4086,7 @@ namespace X11
 					pTargetVector += nVecTarget;
 
 					nVecRead = (y * width) - nXStart;
+					nVecRead += -16;
 					for (int x = nXStart; x < ex; x += 16, pTargetVector += 16, nVecRead += -16, nVecTarget += 16)
 					{
 						_sx = _mm512_set_1to16_epi32(x);
@@ -4057,7 +4098,7 @@ namespace X11
 					}
 
 					pTargetVector -= nVecTarget; // reset pointer
-
+					nVecTarget -= nOffSet;
 
 				}
 
@@ -5691,6 +5732,8 @@ namespace X11
 			olc::vi2d sourcepos = { ox, oy };
 			olc::vi2d size = { w, h };
 			spr = sprite->Duplicate_SIMD(sourcepos, size);
+			
+
 			olc::vi2d vPos = { x, y };
 			if (scale > 1)
 			{
