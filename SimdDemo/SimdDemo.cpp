@@ -165,7 +165,7 @@ public:
 		nLayerBackGround = CreateLayer();
 		SetDrawTarget(nLayerBackGround);
 		Clear_SIMD(olc::WHITE);
-		//DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
+		DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
 		EnableLayer(nLayerBackGround, true);
 
 
@@ -195,24 +195,21 @@ public:
 		SetDrawTarget(nLayerDrawSprite);
 		Clear_SIMD(olc::BLANK);
 
-		//DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
-		//DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
-		//DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
-		//DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
-		////DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
-		//DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
-
-		sprMrSmiley = sprMrIcey->Duplicate_SIMD(2);
-		DrawSprite({ 10, 50 }, sprMrSmiley);
+		DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
+		DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
+		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
+		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
+		DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
+		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
 
 		//
 		SetDrawTarget(nLayerDrawPartialSprite);
 		Clear_SIMD(olc::BLANK);
-		/*DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
+		DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
 		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 2, olc::Sprite::HORIZ);
 		DrawPartialSprite_SIMD({ 700, 100 }, sprSpriteSheet, { 0, 0 }, { 150,150 }, 1, olc::Sprite::NONE);
 		DrawPartialSprite_SIMD({ 850, 100 }, sprSpriteSheet, { 150, 0 }, { 100,150 }, 1, olc::Sprite::HORIZ);
-		DrawPartialSprite_SIMD({ 950, 120 }, sprSpriteSheet, { 250, 0 }, { 100,150 }, 1, olc::Sprite::VERT);*/
+		DrawPartialSprite_SIMD({ 950, 120 }, sprSpriteSheet, { 250, 0 }, { 100,150 }, 1, olc::Sprite::VERT);
 
 		// merge!!
 		SetDrawTarget(nLayerDrawMergeSprite);
