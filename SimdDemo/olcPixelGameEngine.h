@@ -919,8 +919,9 @@ namespace olc
 
 		/// <summary>
 		/// Stores sub sprites that are created during runtime, if 'Store Sub Strites' is enabled
+		/// vecSubSprites.push_back({vStartPos, vSize, scale, flip, pSubSprite, id});
 		/// </summary>
-		std::vector<std::tuple<olc::vi2d, olc::vi2d, uint32_t, uint8_t, Sprite*>> vecSubSprites;
+		std::vector<std::tuple<olc::vi2d, olc::vi2d, uint32_t, uint8_t, Sprite*, size_t>> vecSubSprites;
 
 		/// <summary>
 		/// SIMD Instruction Options
@@ -2606,10 +2607,10 @@ namespace X11
 
 			int nVecTarget = 0;
 			int* pTargetVector = (int*)spr->pColData.data();
-			int nVecTLen = spr->pColData.size();
+			size_t nVecTLen = spr->pColData.size();
 
-			int nVecRead = 0; // Start position of read vector
-			int nVecRLen = pColData.size();
+			size_t nVecRead = 0; // Start position of read vector
+			size_t nVecRLen = pColData.size();
 
 			__m128i _sx, _ex, _result, _vecRead;
 
@@ -2654,7 +2655,7 @@ namespace X11
 
 			//Clean up any left over pixels
 			_vecRead = _mm_set1_epi32(0);
-			_ex = _mm_set1_epi32(nVecTLen);
+			_ex = _mm_set1_epi32((int)nVecTLen);
 			for (int x = nVecTarget; x < nVecTLen; x += 4, pTargetVector += 4)
 			{
 				// We compare if the all the pixels ly within sx->nVecTLen, and pixel greater then ex are not process
@@ -2703,10 +2704,10 @@ namespace X11
 
 			int nVecTarget = 0;
 			float* pTargetVector = (float*)spr->pColData.data();
-			int nVecTLen = spr->pColData.size();
+			size_t nVecTLen = spr->pColData.size();
 
-			int nVecRead = 0; // Start position of read vector
-			int nVecRLen = pColData.size();
+			size_t nVecRead = 0; // Start position of read vector
+			size_t nVecRLen = pColData.size();
 
 			__m256i _reverse, _sx, _ex, _compare, _blankpixels;
 			__m256 _result, _vecRead;
@@ -2755,7 +2756,7 @@ namespace X11
 			//Clean up any left over pixels
 			_compare = _mm256_set1_epi32(0);
 			_blankpixels = _mm256_set1_epi32(0);
-			_ex = _mm256_set1_epi32(nVecTLen);
+			_ex = _mm256_set1_epi32((int)nVecTLen);
 			for (int x = nVecTarget; x < nVecTLen; x += 8, pTargetVector += 8)
 			{
 				//We compare if the all the pixels ly within sx->nVecTLen, and pixel greater then ex are not process
@@ -2803,12 +2804,12 @@ namespace X11
 
 			int nVecTarget = 0;
 			int* pTargetVector = (int*)spr->pColData.data();
-			int nVecTLen = spr->pColData.size();
+			size_t nVecTLen = spr->pColData.size();
 
-			int nVecRead = 0; // Start position of read vector
-			int nVecRLen = pColData.size();
+			size_t nVecRead = 0; // Start position of read vector
+			size_t nVecRLen = pColData.size();
 
-			__m512i _reverse, _sx, _ex, _result, _vecRead, _compare, _blankpixels;
+			__m512i _reverse, _sx, _ex, _result, _vecRead, _blankpixels;
 
 			_reverse = _mm512_set_epi32(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 
@@ -2855,7 +2856,7 @@ namespace X11
 
 			//Clean up any left over pixels
 			_blankpixels = _mm512_set1_epi32(0);
-			_ex = _mm512_set1_epi32(nVecTLen);
+			_ex = _mm512_set1_epi32((int)nVecTLen);
 			for (int x = nVecTarget; x < nVecTLen; x += 16, pTargetVector += 16)
 			{
 				//We compare if the all the pixels ly within sx->nVecTLen, and pixel greater then ex are not process
@@ -2949,15 +2950,15 @@ namespace X11
 
 			int nVecTarget = 0; // Target vector position
 			float* pTargetVector = (float*)spr->pColData.data(); // Target vector pointer
-			int nVecTLen = spr->pColData.size(); // Target vector size
+			size_t nVecTLen = spr->pColData.size(); // Target vector size
 
-			int nVecRead = 0; // Start position of read vector
-			int nVecRLen = pColData.size(); // Read vector size
+			uint32_t nVecRead = 0; // Start position of read vector
+			size_t nVecRLen = pColData.size(); // Read vector size
 
 			int nReadCount = std::max(int(4 / scale), 1); // Number of pixels to be read in
 
 			int nOffSet = 4 % scale; // Offset for left over pixels
-			int nScaleCount = 0; // Scale count used when the scale is greater than the register
+			uint32_t nScaleCount = 0; // Scale count used when the scale is greater than the register
 			if (scale > 4)
 			{
 				nOffSet = 0;
@@ -2965,7 +2966,7 @@ namespace X11
 			}
 
 			int nsuffle[4] = { 0, 0, 0, 0 }; // Suffle Pixels
-			int nPosCounter = 0; // Suffle position counter
+			uint32_t nPosCounter = 0; // Suffle position counter
 			int nPos = 0; // Suffle start position
 
 			// as Scale 2 the it is double 1 pixel becomes 2
@@ -2993,7 +2994,7 @@ namespace X11
 			nPosCounter = 0;
 
 			int y = 0; int x = 0; int yS = 0;
-			int nTottle = scale;
+			uint32_t nTottle = scale;
 
 			for (y = 0; y < height; y++, yS++)
 			{
@@ -3019,11 +3020,11 @@ namespace X11
 					{
 						_ex = _mm_set1_epi32(nScaleCount + 1);
 
-						for (int i = 1; i < nScaleCount; i += 4)
+						for (int i = 1; i < (int)nScaleCount; i += 4)
 						{
 							pTargetVector += 4;
 							nVecTarget += 4;
-							nOffSet = (i * 4) - nScaleCount;
+							nOffSet = (i * 4) - (int)nScaleCount;
 							_sx = _mm_set_epi32(i + 3, i + 2, i + 1, i);
 							_compare = _mm_cmpgt_epi32(_ex, _sx);
 							_mm_maskstore_ps(pTargetVector, _compare, _result);
@@ -3050,7 +3051,7 @@ namespace X11
 				// if so process them
 				for (int i = nYPos; i < nVecRLen; i++)
 				{
-					for (int j = 0; j < scale; j++, nYTarPos++)
+					for (size_t j = 0; j < scale; j++, nYTarPos++)
 					{
 						if (nYTarPos >= nVecTLen) break;
 						spr->pColData[nYTarPos] = pColData[i];
@@ -3078,10 +3079,10 @@ namespace X11
 			int ex = width;
 			int nVecTarget = 0; // Target vector position
 			float* pTargetVector = (float*)spr->pColData.data(); // Target vector pointer
-			int nVecTLen = spr->pColData.size(); // Target vector size
+			size_t nVecTLen = spr->pColData.size(); // Target vector size
 
 			int nVecRead = 0; // Start position of read vector
-			int nVecRLen = pColData.size(); // Read vector size
+			size_t nVecRLen = pColData.size(); // Read vector size
 
 			int nReadCount = std::max(int(8 / scale), 1); // Number of pixels to be read in
 
@@ -3094,7 +3095,7 @@ namespace X11
 			}
 
 			int nsuffle[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; // Suffle Pixels
-			int nPosCounter = 0; // Suffle position counter
+			uint32_t nPosCounter = 0; // Suffle position counter
 			int nPos = 0; // Suffle start position
 
 			// as Scale 2 the it is double 1 pixel becomes 2
@@ -3123,7 +3124,7 @@ namespace X11
 			nPosCounter = 0;
 
 			int y = 0; int x = 0;int yS = 0;
-			int nTottle = scale;
+			size_t nTottle = scale;
 
 			for (y = 0; y < height; y++, yS++)
 			{
@@ -3178,7 +3179,7 @@ namespace X11
 				// if so process them
 				for (int i = nYPos; i < nVecRLen; i++)
 				{
-					for (int j = 0; j < scale; j++, nYTarPos++)
+					for (int j = 0; j < (int)scale; j++, nYTarPos++)
 					{
 						if (nYTarPos >= nVecTLen) break;
 						spr->pColData[nYTarPos] = pColData[i];
@@ -3207,10 +3208,10 @@ namespace X11
 
 			int nVecTarget = 0; // Target vector position
 			int* pTargetVector = (int*)spr->pColData.data(); // Target vector pointer
-			int nVecTLen = spr->pColData.size(); // Target vector size
+			size_t nVecTLen = spr->pColData.size(); // Target vector size
 
-			int nVecRead = 0; // Start position of read vector
-			int nVecRLen = pColData.size(); // Read vector size
+			size_t nVecRead = 0; // Start position of read vector
+			size_t nVecRLen = pColData.size(); // Read vector size
 
 			int nReadCount = std::max(int(16 / scale), 1); // Number of pixels to be read in
 
@@ -3223,7 +3224,7 @@ namespace X11
 			}
 
 			int nsuffle[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // Suffle Pixels
-			int nPosCounter = 0; // Suffle position counter
+			size_t nPosCounter = 0; // Suffle position counter
 			int nPos = 0; // Suffle start position
 
 			// as Scale 2 the it is double 1 pixel becomes 2
@@ -3240,7 +3241,7 @@ namespace X11
 
 			}
 
-			__m512i _reverse, _sx, _ex, _compare, _vecRead;
+			__m512i _reverse, _sx, _ex, _vecRead;
 			_sx = _mm512_set1_epi32(0);
 			_ex = _mm512_set1_epi32(ex);
 
@@ -3249,7 +3250,7 @@ namespace X11
 			nPosCounter = 0;
 
 			int y = 0; int x = 0; int yS = 0;
-			int nTottle = scale;
+			size_t nTottle = scale;
 
 			for (y = 0; y < height; y++, yS++)
 			{
@@ -3303,7 +3304,7 @@ namespace X11
 				// if so process them
 				for (int i = nYPos; i < nVecRLen; i++)
 				{
-					for (int j = 0; j < scale; j++, nYTarPos++)
+					for (int j = 0; j < (int)scale; j++, nYTarPos++)
 					{
 						if (nYTarPos >= nVecTLen) break;
 						spr->pColData[nYTarPos] = pColData[i];
@@ -3386,10 +3387,10 @@ namespace X11
 
 			int nVecTarget = 0;
 			int* pTargetVector = (int*)spr->pColData.data();
-			int nVecTLen = spr->pColData.size();
+			size_t nVecTLen = spr->pColData.size();
 
-			int nVecRead = (vPos.y * width) + vPos.x; // Start position of read vector
-			int nVecRLen = pColData.size();
+			size_t nVecRead = (vPos.y * width) + vPos.x; // Start position of read vector
+			size_t nVecRLen = pColData.size();
 
 			__m128i _sx, _ex, _result, _vecRead;
 
@@ -3437,8 +3438,8 @@ namespace X11
 
 			//Clean up any left over pixels
 			_vecRead = _mm_set1_epi32(0);
-			_ex = _mm_set1_epi32(nVecTLen);
-			for (int x = nVecTarget; x < nVecTLen; x += 8, pTargetVector += 8)
+			_ex = _mm_set1_epi32((int)nVecTLen);
+			for (int x = nVecTarget; x < (int)nVecTLen; x += 8, pTargetVector += 8)
 			{
 				// We compare if the all the pixels ly within sx->nVecTLen, and pixel greater then ex are not process
 				_sx = _mm_set_epi32(x + 3, x + 2, x + 1, x);
@@ -3482,10 +3483,10 @@ namespace X11
 
 			int nVecTarget = 0;
 			int* pTargetVector = (int*)spr->pColData.data();
-			int nVecTLen = spr->pColData.size();
+			size_t nVecTLen = spr->pColData.size();
 
-			int nVecRead = (vPos.y * width) + vPos.x; // Start position of read vector
-			int nVecRLen = pColData.size();
+			size_t nVecRead = (vPos.y * width) + vPos.x; // Start position of read vector
+			size_t nVecRLen = pColData.size();
 
 			__m256i _sx, _ex, _result, _vecRead;
 
@@ -3533,8 +3534,8 @@ namespace X11
 
 			//Clean up any left over pixels
 			_vecRead = _mm256_set1_epi32(0);
-			_ex = _mm256_set1_epi32(nVecTLen);
-			for (int x = nVecTarget; x < nVecTLen; x += 8, pTargetVector += 8)
+			_ex = _mm256_set1_epi32((int)nVecTLen);
+			for (int x = nVecTarget; x < (int)nVecTLen; x += 8, pTargetVector += 8)
 			{
 				// We compare if the all the pixels ly within sx->nVecTLen, and pixel greater then ex are not process
 				_sx = _mm256_set_epi32(x + 7, x + 6, x + 5, x + 4, x + 3, x + 2, x + 1, x);
@@ -3577,10 +3578,10 @@ namespace X11
 
 			int nVecTarget = 0;
 			int* pTargetVector = (int*)spr->pColData.data();
-			int nVecTLen = spr->pColData.size();
+			size_t nVecTLen = spr->pColData.size();
 
-			int nVecRead = (vPos.y * width) + vPos.x; // Start position of read vector
-			int nVecRLen = pColData.size();
+			size_t nVecRead = (vPos.y * width) + vPos.x; // Start position of read vector
+			size_t nVecRLen = pColData.size();
 
 			__m512i _sx, _ex, _result, _vecRead;
 
@@ -3625,8 +3626,8 @@ namespace X11
 
 			//Clean up any left over pixels
 			_vecRead = _mm512_set1_epi32(0);
-			_ex = _mm512_set1_epi32(nVecTLen);
-			for (int x = nVecTarget; x < nVecTLen; x += 8, pTargetVector += 8)
+			_ex = _mm512_set1_epi32((int)nVecTLen);
+			for (int x = nVecTarget; x < (int)nVecTLen; x += 8, pTargetVector += 8)
 			{
 				// we compare if the all the pixels ly within sx->ex, and pixel greater then ex are not process
 				_sx = _mm512_set_epi32(x + 15, x + 14, x + 13, x + 12, x + 11, x + 10, x + 9, x + 8, x + 7, x + 6, x + 5, x + 4, x + 3, x + 2, x + 1, x);
@@ -3712,12 +3713,12 @@ namespace X11
 			// Get the target layer vector pointer
 			int nVecTarget = (nYPos * pdrawTarget->width) + nXPos;
 			int* pTargetVector = (int*)pdrawTarget->pColData.data();
-			int nVecTLen = pdrawTarget->pColData.size();
+			size_t nVecTLen = pdrawTarget->pColData.size();
 			int nTargetY = 0;
 
 			// Get the local sprite vector detals
-			int nVecRead = 0; // Start position of read vector
-			int nVecRLen = pColData.size();
+			size_t nVecRead = 0; // Start position of read vector
+			size_t nVecRLen = pColData.size();
 
 			// Set up counters
 			int sx = 0;
@@ -3729,7 +3730,7 @@ namespace X11
 			int nOffSet = nWidth % 4;
 			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
-			__m128i _reverse, _sx, _ex, _compare, _blankpixels, _vecRead, _result;
+			__m128i _reverse, _sx, _ex, _compare, _vecRead;
 
 			_reverse = _mm_set_epi32(0, 1, 2, 3);
 			_sx = _mm_set1_epi32(0);
@@ -3832,12 +3833,12 @@ namespace X11
 			// Get the target layer vector pointer
 			int nVecTarget = (nYPos * pdrawTarget->width) + nXPos;
 			float* pTargetVector = (float*)pdrawTarget->pColData.data();
-			int nVecTLen = pdrawTarget->pColData.size();
+			size_t nVecTLen = pdrawTarget->pColData.size();
 			int nTargetY = 0;
 
 			// Get the local sprite vector detals
-			int nVecRead = 0; // Start position of read vector
-			int nVecRLen = pColData.size();
+			size_t nVecRead = 0; // Start position of read vector
+			size_t nVecRLen = pColData.size();
 
 			// Set up counters
 			int sx = 0;
@@ -3851,8 +3852,8 @@ namespace X11
 
 
 			// Set up registers
-			__m256i _reverse, _sx, _ex, _compare, _blankpixels;
-			__m256 _result, _vecRead;
+			__m256i _reverse, _sx, _ex, _compare;
+			__m256  _vecRead;
 			_reverse = _mm256_set_epi32(0, 1, 2, 3, 4, 5, 6, 7);
 			_sx = _mm256_set1_epi32(0);
 			_ex = _mm256_set1_epi32(ex);
@@ -3956,12 +3957,12 @@ namespace X11
 			// Get the target layer vector pointer
 			int nVecTarget = (nYPos * pdrawTarget->width) + nXPos;
 			float* pTargetVector = (float*)pdrawTarget->pColData.data();
-			int nVecTLen = pdrawTarget->pColData.size();
+			size_t nVecTLen = pdrawTarget->pColData.size();
 			int nTargetY = 0;
 
 			// Get the local sprite vector detals
 			int nVecRead = 0; // Start position of read vector
-			int nVecRLen = pColData.size();
+			size_t nVecRLen = pColData.size();
 
 			// Set up counters
 			int sx = 0;
@@ -3973,7 +3974,7 @@ namespace X11
 			int nOffSet = nWidth % 16;
 			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
-			__m512i _reverse, _sx, _ex, _compare, _blankpixels, _vecRead, _result;
+			__m512i _reverse, _sx, _ex, _vecRead;
 
 			_reverse = _mm512_set_epi32(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 
@@ -4064,20 +4065,7 @@ namespace X11
 					return pdrawTarget;
 				}
 
-				for (int i = 0; i < vecSubSprites.size(); i++)
-				{
-					if (std::get<0>(vecSubSprites[i]) == vPos
-						&& std::get<2>(vecSubSprites[i]) == scale
-						&& std::get<3>(vecSubSprites[i]) == flip)
-					{
-						// We found a match all we need to do now is draw it
-						spr = std::get<4>(vecSubSprites[i]);
-						// We set the flip to NONE as all this work has already been done
-						spr->Duplicate_SIMD(vPos, pdrawTarget);
-						return pdrawTarget;
-						break;
-					}
-				}
+
 			}
 
 			//1: Lets flip it (if Store Sub Sprites in enable a copy will be returned)
@@ -4240,7 +4228,9 @@ namespace X11
 				}
 			}
 
-			vecSubSprites.push_back({ vStartPos, vSize, scale, flip, pSubSprite });
+			size_t id = vecSubSprites.size();
+
+			vecSubSprites.push_back({ vStartPos, vSize, scale, flip, pSubSprite, id });
 
 
 		}
@@ -4883,7 +4873,7 @@ namespace X11
 			}
 
 			int VecStartIndex = 0;
-			int VecEndIndex = pDrawTarget->pColData.size();
+			int VecEndIndex = (int)pDrawTarget->pColData.size();
 			int nTempVecEnd = VecStartIndex;
 			switch (INSTRUCTION_SET)
 			{
@@ -5534,7 +5524,7 @@ namespace X11
 			uint32_t setPixel = (int)p.n;
 			setPixel = (int)p.n;
 
-			__m512i _setpixel, _sx, _ex, _result;
+			__m512i _setpixel, _sx, _ex;
 			_setpixel = _mm512_set1_epi32(setPixel);
 			_sx = _mm512_set1_epi32(sx);
 			_ex = _mm512_set1_epi32(ex);
