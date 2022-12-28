@@ -1163,10 +1163,10 @@ namespace olc
 		/// <param name="pdrawTarget">A pointer to the draw target</param>
 		/// <param name="vStartPos">Start position (x,y)</param>
 		/// <param name="vSize">Size (width, height)</param>
-		/// <param name="scale">Scaler (<=1)</param>
-		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT</param>
+		/// <param name="scale">Scaler value (>= 1) (Default 1)</param>
+		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT; (default NONE)</param>
 		/// <returns>A pointer to the draw target (Auto memory Managed)</returns>
-		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, const olc::vi2d& vStartPos, const olc::vi2d& vSize, uint32_t scale, uint8_t flip);
+		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, const olc::vi2d& vStartPos, const olc::vi2d& vSize, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
 
 
 
@@ -1174,10 +1174,22 @@ namespace olc
 		/// Stores a sprite in the Sub Sprites vector if it does not exist
 		/// </summary>
 		/// <param name="pSubSprite">A pointer to the sprite to be stored</param>
-		/// <param name="vStartPos">Partial Sprite Start position, (default {0,0})</param>
-		/// <param name="scale">Scaler value (>= 1) (default 1)</param>
+		/// <param name="vStartPos">Partial Sprite Start position, (Default {0,0})</param>
+		/// <param name="scale">Scaler value (>= 1) (Default 1)</param>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT; (default NONE)</param>
 		void StoreSubSprite(olc::Sprite* pSubSprite, olc::vi2d vStartPos = {0, 0}, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+
+		/// <summary>
+		/// Gets a stored sub sprite from the Stored Sub Sprite Vector
+		/// </summary>
+		/// <param name="vStartPos">Start position (x,y)</param>
+		/// <param name="vSize">Size (width, height)</param>
+		/// <param name="scale">Scaler (>=1) (Default 1)</param>
+		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT; (Default NONE)</param>
+		/// <returns>A pointer to a sprite, nullptr is not exist</returns>
+		olc::Sprite* GetStoredSubSprite(olc::vi2d vStartPos, olc::vi2d vSize, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+
+
 
 	private:
 
@@ -2513,29 +2525,17 @@ namespace X11
 		{
 
 			olc::Sprite* spr = nullptr;
-			olc::vi2d vPos = { 0, 0 };
+			olc::vi2d vStartPos = { 0, 0 };
 			olc::vi2d vSize = { this->width, this->height };
 			uint32_t scale = 1;
 
 			// Lets check if the sprite all ready exist?
 			if (bStoreSubSprite)
 			{
-				Sprite* spr = nullptr;
-				uint32_t scale = 1;
-				for (int i = 0; i < vecSubSprites.size(); i++)
-				{
-					if (std::get<0>(vecSubSprites[i]) == vPos
-						&& std::get<2>(vecSubSprites[i]) == scale
-						&& std::get<3>(vecSubSprites[i]) == flip)
-					{
-						// We found a match all we need to do now is draw it
-						spr = std::get<4>(vecSubSprites[i]);
-						return spr;
-						break;
-					}
-				}
-			}
+				spr = GetStoredSubSprite(vStartPos, vSize, scale, flip);
+				if (spr != nullptr) return spr;
 
+			}
 
 
 			if (flip == olc::Sprite::NONE)
@@ -2543,10 +2543,9 @@ namespace X11
 				// Return a copy of the sprite
 				spr = this->Duplicate();
 				spr->setInsturctionSet(getInsturctionSet());
-				//spr->setStoreSubSprites(getStoreSubSprites());
 				if (bStoreSubSprite)
 				{
-					StoreSubSprite(spr, vPos, scale, (olc::Sprite::Flip)flip);
+					StoreSubSprite(spr, vStartPos, scale, flip);
 				}
 				
 				return spr;
@@ -2583,7 +2582,7 @@ namespace X11
 		olc::Sprite* Sprite::Duplicate_SSE(olc::Sprite::Flip flip)
 		{
 
-			olc::vi2d vPos = { 0, 0 };
+			olc::vi2d vStartPos = { 0, 0 };
 			olc::vi2d vSize = { this->width, this->height };
 			uint32_t scale = 1;
 
@@ -2669,7 +2668,7 @@ namespace X11
 
 			if (bStoreSubSprite)
 			{
-				StoreSubSprite(spr, vPos, scale, (olc::Sprite::Flip)flip);
+				StoreSubSprite(spr, vStartPos, scale, (olc::Sprite::Flip)flip);
 			}
 
 
@@ -2679,7 +2678,7 @@ namespace X11
 
 		olc::Sprite* Sprite::Duplicate_AVX256(olc::Sprite::Flip flip)
 		{
-			olc::vi2d vPos = { 0, 0 };
+			olc::vi2d vStartPos = { 0, 0 };
 			olc::vi2d vSize = { this->width, this->height };
 			uint32_t scale = 1;
 
@@ -2770,7 +2769,7 @@ namespace X11
 
 			if (bStoreSubSprite)
 			{
-				StoreSubSprite(spr, vPos, scale, (olc::Sprite::Flip)flip);
+				StoreSubSprite(spr, vStartPos, scale, (olc::Sprite::Flip)flip);
 			}
 
 			return spr;
@@ -2779,7 +2778,7 @@ namespace X11
 
 		olc::Sprite* Sprite::Duplicate_AVX512(olc::Sprite::Flip flip)
 		{
-			olc::vi2d vPos = { 0, 0 };
+			olc::vi2d vStartPos = { 0, 0 };
 			olc::vi2d vSize = { this->width, this->height };
 			uint32_t scale = 1;
 
@@ -2870,7 +2869,7 @@ namespace X11
 
 			if (bStoreSubSprite)
 			{
-				StoreSubSprite(spr, vPos, scale, (olc::Sprite::Flip)flip);
+				StoreSubSprite(spr, vStartPos, scale, flip);
 			}
 
 			return spr;
@@ -2889,19 +2888,9 @@ namespace X11
 			// Lets check if the sprite all ready exist?
 			if (bStoreSubSprite)
 			{
-				Sprite* spr = nullptr;
-				for (int i = 0; i < vecSubSprites.size(); i++)
-				{
-					if (std::get<0>(vecSubSprites[i]) == vStartPos
-						&& std::get<1>(vecSubSprites[i])== vSize
-						&& std::get<2>(vecSubSprites[i]) == scale)
-					{
-						// We found a match all we need to do now is draw it
-						spr = std::get<4>(vecSubSprites[i]);
-						return spr;
-						break;
-					}
-				}
+				spr = GetStoredSubSprite(vStartPos, vSize, scale);
+				if (spr != nullptr) return spr;
+				
 			}
 
 
@@ -3072,8 +3061,8 @@ namespace X11
 
 			if (bStoreSubSprite)
 			{
-				olc::vi2d vPos = { 0,0 };
-				StoreSubSprite(spr, vPos, scale);
+				olc::vi2d vStartPos = { 0,0 };
+				StoreSubSprite(spr, vStartPos, scale);
 			}
 
 			return spr;
@@ -3199,8 +3188,8 @@ namespace X11
 
 			if (bStoreSubSprite)
 			{
-				olc::vi2d vPos = { 0,0 };
-				StoreSubSprite(spr, vPos, scale);
+				olc::vi2d vStartPos = { 0,0 };
+				StoreSubSprite(spr, vStartPos, scale);
 			}
 
 
@@ -3324,8 +3313,8 @@ namespace X11
 
 			if (bStoreSubSprite)
 			{
-				olc::vi2d vPos = { 0,0 };
-				StoreSubSprite(spr, vPos, scale);
+				olc::vi2d vStartPos = { 0,0 };
+				StoreSubSprite(spr, vStartPos, scale);
 			}
 
 
@@ -3335,28 +3324,16 @@ namespace X11
 
 		/*--------------------------------------------------------------------------------------*/
 
-		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, const olc::vi2d& vSize)
+		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vStartPos, const olc::vi2d& vSize)
 		{
 
-			olc::Sprite* spr = nullptr;
-			uint32_t scale = 1;
-
+			
 			// Lets check if the sprite all ready exist?
 			if (bStoreSubSprite)
 			{
-				Sprite* spr = nullptr;
-				uint32_t scale = 1;
-				for (int i = 0; i < vecSubSprites.size(); i++)
-				{
-					if (std::get<0>(vecSubSprites[i]) == vPos
-						&& std::get<1>(vecSubSprites[i]) == vSize)
-					{
-						// We found a match all we need to do now is draw it
-						spr = std::get<4>(vecSubSprites[i]);
-						return spr;
-						break;
-					}
-				}
+				olc::Sprite* spr = GetStoredSubSprite(vStartPos, vSize);
+				if (spr != nullptr) return spr;
+
 			}
 
 			switch (getInsturctionSet())
@@ -3364,23 +3341,23 @@ namespace X11
 
 			case SIMD_AVX:
 			case SIMD_AVX2:
-				return Duplicate_AVX256(vPos, vSize);
+				return Duplicate_AVX256(vStartPos, vSize);
 				break;
 
 			case SIMD_SSE:
 			case SIMD_SSE2:
 			case SIMD_SSE3:
 			case SIMD_SSE41:
-				return Duplicate_SSE(vPos, vSize);
+				return Duplicate_SSE(vStartPos, vSize);
 				break;
 
 			case SIMD_AVX512:
-				return Duplicate_AVX512(vPos, vSize);
+				return Duplicate_AVX512(vStartPos, vSize);
 				break;
 
 			default:
 				// nothing we can do, but run everything using the complier (unrolling)
-				return Duplicate(vPos, vSize);
+				return Duplicate(vStartPos, vSize);
 				break;
 			}
 
@@ -3673,7 +3650,7 @@ namespace X11
 
 		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget)
 		{
-
+			// NOTE: This method is used soley to draw to the draw target
 			switch (getInsturctionSet())
 			{
 
@@ -3694,10 +3671,9 @@ namespace X11
 				break;
 
 			default:
-				// nothing we can do, but run everything using the complier (unrolling)
-				//return Duplicate(flip);
 				break;
 			}
+			return pdrawTarget;
 
 
 		}
@@ -4072,12 +4048,22 @@ namespace X11
 
 		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint8_t flip)
 		{
+			olc::vi2d vStartPos = { 0,0 };
+			uint32_t scale = 1;
 
 			// Lets check if the sprite all ready exist?
 			if (bStoreSubSprite)
 			{
-				Sprite* spr = nullptr;
-				uint32_t scale = 1;
+				
+				
+				olc::vi2d vScaleSize = { this->width * (int)scale, this->height * (int)scale };
+				olc::Sprite* spr = GetStoredSubSprite(vStartPos, vScaleSize, scale, (olc::Sprite::Flip)flip);
+				if (spr != nullptr)
+				{
+					spr->Duplicate_SIMD(vPos, pdrawTarget);
+					return pdrawTarget;
+				}
+
 				for (int i = 0; i < vecSubSprites.size(); i++)
 				{
 					if (std::get<0>(vecSubSprites[i]) == vPos
@@ -4101,11 +4087,8 @@ namespace X11
 			sprFlipped->Duplicate_SIMD(vPos, pdrawTarget);
 			if (bStoreSubSprite)
 			{
-				// TODO: John Galvin: Needs to be moved to a method
-				olc::vi2d vInteralPos = { 0,0 };
 				olc::vi2d vSize = { sprFlipped->width, sprFlipped->height };
-				uint32_t scale = 1;
-				StoreSubSprite(sprFlipped, vInteralPos, scale, (olc::Sprite::Flip)flip);
+				StoreSubSprite(sprFlipped, vStartPos, scale, (olc::Sprite::Flip)flip);
 				
 			}
 			else
@@ -4127,21 +4110,13 @@ namespace X11
 			// Lets check if the sprite all ready exist?
 			if (bStoreSubSprite)
 			{
-				olc::vi2d vInternalPos = { 0,0 };
-				Sprite* spr = nullptr;
-				for (int i = 0; i < vecSubSprites.size(); i++)
+				olc::vi2d vStartPos = { 0,0 };
+				olc::vi2d vScaleSize = { this->width * (int)scale, this->height * (int)scale };
+				olc::Sprite* spr = GetStoredSubSprite(vStartPos, vScaleSize, scale, (olc::Sprite::Flip)flip);
+				if (spr != nullptr)
 				{
-					if (std::get<0>(vecSubSprites[i]) == vInternalPos
-						&& std::get<2>(vecSubSprites[i]) == scale
-						&& std::get<3>(vecSubSprites[i]) == flip)
-					{
-						// We found a match all we need to do now is draw it
-						spr = std::get<4>(vecSubSprites[i]);
-						// We set the flip to NONE as all this work has already been done
-						spr->Duplicate_SIMD(vPos, pdrawTarget);
-						return pdrawTarget;
-						break;
-					}
+					spr->Duplicate_SIMD(vPos, pdrawTarget);
+					return pdrawTarget;
 				}
 			}
 
@@ -4156,10 +4131,9 @@ namespace X11
 			sprScaled->Duplicate_SIMD(vPos, pdrawTarget);
 			if (bStoreSubSprite)
 			{
-				// TODO: John Galvin: Needs to be moved to a method
-				olc::vi2d vInteralPos = { 0,0 };
+				olc::vi2d vStartPos = { 0,0 };
 				olc::vi2d vSize = { sprScaled->width, sprScaled->height };
-				StoreSubSprite(sprScaled, vInteralPos, scale, (olc::Sprite::Flip)flip);
+				StoreSubSprite(sprScaled, vStartPos, scale, (olc::Sprite::Flip)flip);
 			}
 			else
 			{
@@ -4171,9 +4145,7 @@ namespace X11
 
 		}
 
-		//const olc::vi2d& pos, Sprite* sprite, const olc::vi2d& sourcepos, const olc::vi2d& size, uint32_t scale, uint8_t fli
-
-		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, const olc::vi2d& vStartPos, const olc::vi2d& vSize, uint32_t scale, uint8_t flip)
+		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, const olc::vi2d& vStartPos, const olc::vi2d& vSize, uint32_t scale, olc::Sprite::Flip flip)
 		{
 
 			// Lets check if the sprite all ready exist?
@@ -4181,21 +4153,11 @@ namespace X11
 			if (bStoreSubSprite)
 			{
 				olc::vi2d vScaleSize = { vSize.x * (int)scale, vSize.y * (int)scale };
-				Sprite* spr = nullptr;
-				for (int i = 0; i < vecSubSprites.size(); i++)
+				olc::Sprite* spr = GetStoredSubSprite(vStartPos, vScaleSize, scale, flip);
+				if (spr != nullptr)
 				{
-					if (std::get<0>(vecSubSprites[i]) == vStartPos
-						&& std::get<1>(vecSubSprites[i]) == vScaleSize
-						&& std::get<2>(vecSubSprites[i]) == scale
-						&& std::get<3>(vecSubSprites[i]) == flip)
-					{
-						// We found a match all we need to do now is draw it
-						spr = std::get<4>(vecSubSprites[i]);
-						// We set the flip to NONE as all this work has already been done
-						spr->Duplicate_SIMD(vPos, pdrawTarget);
-						return pdrawTarget;
-						break;
-					}
+					spr->Duplicate_SIMD(vPos, pdrawTarget);
+					return pdrawTarget;
 				}
 			}
 
@@ -4215,7 +4177,7 @@ namespace X11
 			if (bStoreSubSprite)
 			{
 				// TODO: John Galvin: Needs to be moved to a method
-				StoreSubSprite(sprScaled, vStartPos, scale, (olc::Sprite::Flip)flip);
+				StoreSubSprite(sprScaled, vStartPos, scale, flip);
 			}
 			else
 			{
@@ -4230,6 +4192,32 @@ namespace X11
 			return pdrawTarget;
 
 		}
+
+		olc::Sprite* Sprite::GetStoredSubSprite(olc::vi2d vStartPos, olc::vi2d vSize, uint32_t scale, olc::Sprite::Flip flip)
+		{
+			// Pre Checks
+			scale = (scale <= 1) ? 1 : scale;
+			if (vSize.x < 1 || vSize.y < 1) return nullptr;
+
+			Sprite* spr = nullptr;
+
+			for (int i = 0; i < vecSubSprites.size(); i++)
+			{
+				if (std::get<0>(vecSubSprites[i]) == vStartPos
+					&& std::get<1>(vecSubSprites[i]) == vSize
+					&& std::get<2>(vecSubSprites[i]) == scale
+					&& std::get<3>(vecSubSprites[i]) == flip)
+				{
+					// found it, break and return the sprite
+					spr = std::get<4>(vecSubSprites[i]);
+					break;
+				}
+			}
+
+			return spr;
+		}
+
+
 
 		void Sprite::StoreSubSprite(olc::Sprite* pSubSprite, olc::vi2d vStartPos, uint32_t scale, olc::Sprite::Flip flip)
 		{
@@ -5390,7 +5378,7 @@ namespace X11
 			olc::vi2d vPos = { x, y };
 			olc::vi2d vStartPos = { ox, oy };
 			olc::vi2d vSize = { w, h };
-			sprite->Duplicate_SIMD(vPos, pDrawTarget, vStartPos, vSize, scale, flip);
+			sprite->Duplicate_SIMD(vPos, pDrawTarget, vStartPos, vSize, scale, (olc::Sprite::Flip)flip);
 
 		}
 
