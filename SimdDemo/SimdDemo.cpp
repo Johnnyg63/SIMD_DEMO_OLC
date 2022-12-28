@@ -57,9 +57,11 @@ public:
 public:
 	bool OnUserCreate() override
 	{
+
 		/*--- Sprites ---*/
 		sprMrIcey = new olc::Sprite("./assets/images/runsmall.png");
 		sprMrIcey->setInsturctionSet(sprMrIcey->getInsturctionSet());
+		sprMrIcey->setInsturctionSet(olc::Sprite::SIMD_AVX);
 		sprMrIcey->setStoreSubSprites(true);
 		nCurrentSIMDOption = sprMrIcey->getInsturctionSet();
 
@@ -74,6 +76,7 @@ public:
 		sprBody3D = new olc::Sprite("./assets/images/Body3D.png");
 		sprBody3D->setInsturctionSet(sprBody3D->getInsturctionSet());
 		sprBody3D->setStoreSubSprites(true);
+
 
 		// Note we took the instruction set from the sprBody3D, we will be merging these later
 		sprFace1 = new olc::Sprite("./assets/images/Face1.png");
@@ -135,7 +138,7 @@ public:
 		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
 		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
 		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
-		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
+		DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
 		EnableLayer(nLayerDrawSprite, true);
 
 		/*------- Level Partial Sprites 6 ------*/
@@ -151,6 +154,9 @@ public:
 		/*------- Level Merge Sprites 7 ------*/
 		nLayerDrawMergeSprite = CreateLayer();
 		SetDrawTarget(nLayerDrawMergeSprite);
+		olc::vi2d vPos = { 50, 50 };
+		olc::vi2d vSize = { 100, 100 };
+		
 		Clear_SIMD(olc::BLANK);
 	
 		EnableLayer(nLayerDrawMergeSprite, true);
@@ -158,8 +164,8 @@ public:
 		/*------- Level Merge Sprites 7 ------*/
 		nLayerBackGround = CreateLayer();
 		SetDrawTarget(nLayerBackGround);
-		Clear_SIMD(olc::BLUE);
-		DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
+		Clear_SIMD(olc::WHITE);
+		//DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
 		EnableLayer(nLayerBackGround, true);
 
 
@@ -188,21 +194,25 @@ public:
 		//
 		SetDrawTarget(nLayerDrawSprite);
 		Clear_SIMD(olc::BLANK);
-		DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
-		DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
-		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
-		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
-		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
-		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
+
+		//DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
+		//DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
+		//DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
+		//DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
+		////DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
+		//DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
+
+		sprMrSmiley = sprMrIcey->Duplicate_SIMD(2);
+		DrawSprite({ 10, 50 }, sprMrSmiley);
 
 		//
 		SetDrawTarget(nLayerDrawPartialSprite);
 		Clear_SIMD(olc::BLANK);
-		DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
+		/*DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
 		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 2, olc::Sprite::HORIZ);
 		DrawPartialSprite_SIMD({ 700, 100 }, sprSpriteSheet, { 0, 0 }, { 150,150 }, 1, olc::Sprite::NONE);
 		DrawPartialSprite_SIMD({ 850, 100 }, sprSpriteSheet, { 150, 0 }, { 100,150 }, 1, olc::Sprite::HORIZ);
-		DrawPartialSprite_SIMD({ 950, 120 }, sprSpriteSheet, { 250, 0 }, { 100,150 }, 1, olc::Sprite::VERT);
+		DrawPartialSprite_SIMD({ 950, 120 }, sprSpriteSheet, { 250, 0 }, { 100,150 }, 1, olc::Sprite::VERT);*/
 
 		// merge!!
 		SetDrawTarget(nLayerDrawMergeSprite);

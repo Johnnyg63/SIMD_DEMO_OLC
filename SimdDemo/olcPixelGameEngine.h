@@ -1106,16 +1106,22 @@ namespace olc
 		/// Creates a duplicate of the sprite by flip (olc::Sprite::NONE.. HORIZ.. VERT)
 		/// </summary>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT</param>
-		/// <returns>A pionter to a NEW duplicate Sprite, enable 'Store Sub Sprites' to auto memory manage the new sprites</returns>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_SIMD(olc::Sprite::Flip flip); // John Galvin
 
+		/// <summary>
+		/// Creates a duplicate scaled sprite (Scale must be >= 1, example: 2,34, etc)
+		/// </summary>
+		/// <param name="scale">Scaler (>= 1)</param>
+		/// <returns>A pionter to a NEW duplicate Sprit, enable 'Store Sub Sprites' to auto memory manage the new spritee</returns>
+		olc::Sprite* Duplicate_SIMD(uint32_t scale); // John Galvin
 
 		/// <summary>
 		/// Creates a duplicate partial sprite using the passed Start Position and Size
 		/// </summary>
 		/// <param name="vPos">Start position (x,y)</param>
 		/// <param name="vSize">Size (width, height)</param>
-		/// <returns>A pionter to a NEW duplicate Sprite, enable 'Store Sub Sprites' to auto memory manage the new sprite</returns>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vPos, const olc::vi2d& vSize);
 
 		/// <summary>
@@ -1163,7 +1169,7 @@ namespace olc
 		/// DO NOT CALL DIRECTY: Use Duplicate_SIMD(olc::Sprite::Flip flip)
 		/// </summary>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ,.. VERT</param>
-		/// <returns>A pionter to a NEW duplicate Sprite, enable 'Store Sub Sprites' to auto memory manage the new sprite</returns>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_SSE(olc::Sprite::Flip flip);
 
 		/// <summary>
@@ -1171,7 +1177,7 @@ namespace olc
 		/// DO NOT CALL DIRECTY: Use Duplicate_SIMD(olc::Sprite::Flip flip)
 		/// </summary>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ,.. VERT</param>
-		/// <returns>A pionter to a NEW duplicate Sprite, enable 'Store Sub Sprites' to auto memory manage the new sprite</returns>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_AVX256(olc::Sprite::Flip flip);
 
 		/// <summary>
@@ -1179,10 +1185,37 @@ namespace olc
 		/// DO NOT CALL DIRECTY: Use Duplicate_SIMD(olc::Sprite::Flip flip)
 		/// </summary>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ,.. VERT</param>
-		/// <returns>A pionter to a NEW duplicate Sprite, enable 'Store Sub Sprites' to auto memory manage the new sprite</returns>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_AVX512(olc::Sprite::Flip flip);
 
 		/*------------------------------------------------------------------------------------------------------------------------*/
+
+		/// <summary>
+		/// Creates a duplicate scaled sprite, using SSE (128bit) Instruction Set
+		/// DO NOT CALL DIRECTY: Use Duplicate_SIMD(olc::Sprite::Flip flip)
+		/// </summary>
+		/// <param name="flip">Scaler (>= 1)</param>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
+		olc::Sprite* Duplicate_SSE(uint32_t scale);
+
+		/// <summary>
+		/// Creates a duplicate scaled sprite, using AVX (256bit) Instruction Set
+		/// DO NOT CALL DIRECTY: Use Duplicate_SIMD(olc::Sprite::Flip flip)
+		/// </summary>
+		/// <param name="flip">Scaler (>= 1)</param>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
+		olc::Sprite* Duplicate_AVX256(uint32_t scale);
+
+		/// <summary>
+		/// Creates a duplicate scaled sprite, using AVX512 (512bit) Instruction Set
+		/// DO NOT CALL DIRECTY: Use Duplicate_SIMD(olc::Sprite::Flip flip)
+		/// </summary>
+		/// <param name="flip">Scaler (>= 1)</param>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
+		olc::Sprite* Duplicate_AVX512(uint32_t scale);
+
+		/*------------------------------------------------------------------------------------------------------------------------*/
+
 
 		/// <summary>
 		/// Create a partial duplicate, using SSE (128bit) Instruction Set
@@ -1190,7 +1223,7 @@ namespace olc
 		/// </summary>
 		/// <param name="vPos">Start position (x,y)</param>
 		/// <param name="vSize">Size (width, height)</param>
-		/// <returns>A pionter to a NEW duplicate Sprite, enable 'Store Sub Sprites' to auto memory manage the new sprite</returns>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_SSE(const olc::vi2d& vPos, const olc::vi2d& vSize);
 
 		/// <summary>
@@ -1199,7 +1232,7 @@ namespace olc
 		/// </summary>
 		/// <param name="vPos">Start position (x,y)</param>
 		/// <param name="vSize">Size (width, height)</param>
-		/// <returns>A pionter to a NEW duplicate Sprite, enable 'Store Sub Sprites' to auto memory manage the new sprite</returns>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_AVX256(const olc::vi2d& vPos, const olc::vi2d& vSize);
 
 		/// <summary>
@@ -1208,7 +1241,7 @@ namespace olc
 		/// </summary>
 		/// <param name="vPos">Start position (x,y)</param>
 		/// <param name="vSize">Size (width, height)</param>
-		/// <returns>A pionter to a NEW duplicate Sprite, enable 'Store Sub Sprites' to auto memory manage the new sprite</returns>
+		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_AVX512(const olc::vi2d& vPos, const olc::vi2d& vSize);
 
 		/*------------------------------------------------------------------------------------------------------------------------*/
@@ -2884,6 +2917,442 @@ namespace X11
 
 		}
 
+		/*--------------------------------------------------------------------------------------*/
+
+		olc::Sprite* Sprite::Duplicate_SIMD(uint32_t scale)
+		{
+
+			olc::Sprite* spr = nullptr;
+			olc::vi2d vPos = { 0, 0 };
+			olc::vi2d vSize = { this->width, this->height };
+
+			// Lets check if the sprite all ready exist?
+			if (bStoreSubSprite)
+			{
+				Sprite* spr = nullptr;
+				uint32_t scale = 1;
+				for (int i = 0; i < vecSubSprites.size(); i++)
+				{
+					if (std::get<0>(vecSubSprites[i]) == vPos
+						&& std::get<1>(vecSubSprites[i])== vSize
+						&& std::get<2>(vecSubSprites[i]) == scale)
+					{
+						// We found a match all we need to do now is draw it
+						spr = std::get<4>(vecSubSprites[i]);
+						return spr;
+						break;
+					}
+				}
+			}
+
+
+
+			if (scale <= 1)
+			{
+				// Return a copy of the sprite
+				spr = this->Duplicate();
+				spr->setInsturctionSet(getInsturctionSet());
+				spr->setStoreSubSprites(getStoreSubSprites());
+				if (bStoreSubSprite)
+				{
+					vecSubSprites.push_back({ vPos, vSize, scale, olc::Sprite::NONE, spr});
+				}
+				return spr;
+			}
+
+
+			switch (getInsturctionSet())
+			{
+
+			case SIMD_AVX:
+			case SIMD_AVX2:
+				return Duplicate_AVX256(scale);
+				break;
+
+			case SIMD_SSE:
+			case SIMD_SSE2:
+			case SIMD_SSE3:
+			case SIMD_SSE41:
+				return Duplicate_SSE(scale);
+				break;
+
+			case SIMD_AVX512:
+				return Duplicate_AVX512(scale);
+				break;
+
+			default:
+				// nothing we can do, but run everything using the complier (unrolling)
+				// we need to add a scaler method to the default commands
+				return Duplicate();
+				break;
+			}
+
+		}
+
+		olc::Sprite* Sprite::Duplicate_SSE(uint32_t scale)
+		{
+
+			olc::Sprite* spr = new olc::Sprite(width * scale, height * scale);
+			spr->setInsturctionSet(getInsturctionSet());
+			spr->setStoreSubSprites(getStoreSubSprites());
+
+			int ex = width;
+
+			int nVecTarget = 0; // Target vector position
+			float* pTargetVector = (float*)spr->pColData.data(); // Target vector pointer
+			int nVecTLen = spr->pColData.size(); // Target vector size
+
+			int nVecRead = 0; // Start position of read vector
+			int nVecRLen = pColData.size(); // Read vector size
+
+			int nReadCount = std::max(int(4 / scale), 1); // Number of pixels to be read in
+
+			int nOffSet = 4 % scale; // Offset for left over pixels
+			int nScaleCount = 0; // Scale count used when the scale is greater than the register
+			if (scale > 4)
+			{
+				nOffSet = 0;
+				nScaleCount = scale - 4;
+			}
+
+			int nsuffle[4] = { 0, 0, 0, 0 }; // Suffle Pixels
+			int nPosCounter = 0; // Suffle position counter
+			int nPos = 0; // Suffle start position
+
+			// as Scale 2 the it is double 1 pixel becomes 2
+			// {i, i, i, i, i, i, i} --> {0, 0, 1, 1, 2, 2, 3, 3}; 
+			for (int i = 0; i < 4; i++)
+			{
+				nsuffle[i] = nPos;
+				nPosCounter++;
+				if (nPosCounter >= scale)
+				{
+					nPosCounter = 0;
+					nPos++;
+				}
+
+			}
+
+			__m128i _reverse, _sx, _ex, _compare;
+			__m128 _result, _vecRead;
+
+			_sx = _mm_set1_epi32(0);
+			_ex = _mm_set1_epi32(ex);
+
+
+			_reverse = _mm_set_epi32(nsuffle[3], nsuffle[2], nsuffle[1], nsuffle[0]);
+			nPosCounter = 0;
+
+			int y = 0; int x = 0; int yS = 0;
+			int nTottle = scale;
+
+			for (y = 0; y < height; y++, yS++)
+			{
+				// Added extra Y Lines of x values
+				nTottle++;
+				if (nTottle < scale) y--;
+				if (nTottle >= scale) nTottle = 0;
+
+				nVecRead = (y * width) + 0;
+				nVecTarget = (yS * spr->width) + 0;
+				pTargetVector += nVecTarget;
+				for (x = 0; x < width; x += nReadCount, nVecRead += nReadCount, pTargetVector += 4, nVecTarget += 4)
+				{
+
+
+					_vecRead = _mm_load_ps((const float*)((olc::Pixel*)pColData.data() + nVecRead));
+					_result = _mm_permutevar_ps(_vecRead, _reverse);
+
+					_mm_storeu_ps(pTargetVector, _result);
+
+					// if out scale is greater than 8 times, i.e.10 then we need repeat the pixels
+					if (nScaleCount > 0)
+					{
+						_ex = _mm_set1_epi32(nScaleCount + 1);
+
+						for (int i = 1; i < nScaleCount; i += 4)
+						{
+							pTargetVector += 4;
+							nVecTarget += 4;
+							nOffSet = (i * 4) - nScaleCount;
+							_sx = _mm_set_epi32(i + 3, i + 2, i + 1, i);
+							_compare = _mm_cmpgt_epi32(_ex, _sx);
+							_mm_maskstore_ps(pTargetVector, _compare, _result);
+
+						}
+					}
+
+					// move back the pointer and vectors to get the offset bytes
+					pTargetVector -= nOffSet;
+					nVecTarget -= nOffSet;
+
+				}
+
+				pTargetVector -= nVecTarget;
+
+			}
+
+			// There can be some pixels on the target sprite left over
+			int nYPos = ((y - 1) * width);
+			int nYTarPos = (yS * (width * scale));
+			// check is there are left over pixels
+			if (nYTarPos < nVecTLen)
+			{
+				// if so process them
+				for (int i = nYPos; i < nVecRLen; i++)
+				{
+					for (int j = 0; j < scale; j++, nYTarPos++)
+					{
+						if (nYTarPos >= nVecTLen) break;
+						spr->pColData[nYTarPos] = pColData[i];
+					}
+				}
+			}
+
+			return spr;
+
+		}
+
+		olc::Sprite* Sprite::Duplicate_AVX256(uint32_t scale)
+		{
+			olc::Sprite* spr = new olc::Sprite(width * scale, height * scale);
+			spr->setInsturctionSet(getInsturctionSet());
+			spr->setStoreSubSprites(getStoreSubSprites());
+
+			int ex = width;
+			int nVecTarget = 0; // Target vector position
+			float* pTargetVector = (float*)spr->pColData.data(); // Target vector pointer
+			int nVecTLen = spr->pColData.size(); // Target vector size
+
+			int nVecRead = 0; // Start position of read vector
+			int nVecRLen = pColData.size(); // Read vector size
+
+			int nReadCount = std::max(int(8 / scale), 1); // Number of pixels to be read in
+
+			int nOffSet = 8 % scale; // Offset for left over pixels
+			int nScaleCount = 0; // Scale count used when the scale is greater than the register
+			if (scale > 8)
+			{
+				nOffSet = 0;
+				nScaleCount = scale - 8;
+			}
+
+			int nsuffle[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; // Suffle Pixels
+			int nPosCounter = 0; // Suffle position counter
+			int nPos = 0; // Suffle start position
+
+			// as Scale 2 the it is double 1 pixel becomes 2
+			// {i, i, i, i, i, i, i} --> {0, 0, 1, 1, 2, 2, 3, 3}; 
+			for (int i = 0; i < 8; i++)
+			{
+				nsuffle[i] = nPos;
+				nPosCounter++;
+				if (nPosCounter >= scale)
+				{
+					nPosCounter = 0;
+					nPos++;
+				}
+
+			}
+
+			__m256i _reverse, _sx, _ex, _compare;
+			__m256 _result, _vecRead;
+
+			//_reverse = _mm256_set_epi32(0, 1, 2, 3, 4, 5, 6, 7);
+			_sx = _mm256_set1_epi32(0);
+			_ex = _mm256_set1_epi32(ex);
+
+
+			_reverse = _mm256_set_epi32(nsuffle[7], nsuffle[6], nsuffle[5], nsuffle[4], nsuffle[3], nsuffle[2], nsuffle[1], nsuffle[0]);
+			nPosCounter = 0;
+
+			int y = 0; int x = 0;int yS = 0;
+			int nTottle = scale;
+
+			for (y = 0; y < height; y++, yS++)
+			{
+				// Added extra Y Lines of x values
+				nTottle++;
+				if (nTottle < scale) y--;
+				if (nTottle >= scale) nTottle = 0;
+
+				nVecRead = (y * width) + 0;
+				nVecTarget = (yS * spr->width) + 0;
+				pTargetVector += nVecTarget;
+				for (x = 0; x < width; x += nReadCount, nVecRead += nReadCount, pTargetVector += 8, nVecTarget += 8)
+				{
+
+					_vecRead = _mm256_load_ps((const float*)((olc::Pixel*)pColData.data() + nVecRead));
+					_result = _mm256_permutevar8x32_ps(_vecRead, _reverse);
+					_mm256_storeu_ps(pTargetVector, _result);
+
+					// if out scale is greater than 8 times, i.e.10 then we need repeat the pixels
+					if (nScaleCount > 0)
+					{
+						_ex = _mm256_set1_epi32(nScaleCount + 1);
+
+						for (int i = 1; i < nScaleCount; i += 8)
+						{
+							pTargetVector += 8;
+							nVecTarget += 8;
+							nOffSet = (i * 8) - nScaleCount;
+							_sx = _mm256_set_epi32(i + 7, i + 6, i + 5, i + 4, i + 3, i + 2, i + 1, i);
+							_compare = _mm256_cmpgt_epi32(_ex, _sx);
+							_mm256_maskstore_ps(pTargetVector, _compare, _result);
+
+						}
+					}
+
+					// move back the pointer and vectors to get the offset bytes
+					pTargetVector -= nOffSet;
+					nVecTarget -= nOffSet;
+
+				}
+
+				pTargetVector -= nVecTarget;
+
+			}
+
+			// There can be some pixels left over, at most 1 full line
+			int nYPos = ((y - 1) * width);
+			int nYTarPos = (yS * (width * scale));
+			// check is there are left over pixels
+			if (nYTarPos < nVecTLen)
+			{
+				// if so process them
+				for (int i = nYPos; i < nVecRLen; i++)
+				{
+					for (int j = 0; j < scale; j++, nYTarPos++)
+					{
+						if (nYTarPos >= nVecTLen) break;
+						spr->pColData[nYTarPos] = pColData[i];
+					}
+				}
+			}
+
+			return spr;
+
+		}
+
+		olc::Sprite* Sprite::Duplicate_AVX512(uint32_t scale)
+		{
+			olc::Sprite* spr = new olc::Sprite(width * scale, height * scale);
+			spr->setInsturctionSet(getInsturctionSet());
+			spr->setStoreSubSprites(getStoreSubSprites());
+
+			int ex = width;
+
+			int nVecTarget = 0; // Target vector position
+			int* pTargetVector = (int*)spr->pColData.data(); // Target vector pointer
+			int nVecTLen = spr->pColData.size(); // Target vector size
+
+			int nVecRead = 0; // Start position of read vector
+			int nVecRLen = pColData.size(); // Read vector size
+
+			int nReadCount = std::max(int(16 / scale), 1); // Number of pixels to be read in
+
+			int nOffSet = 16 % scale; // Offset for left over pixels
+			int nScaleCount = 0; // Scale count used when the scale is greater than the register
+			if (scale > 16)
+			{
+				nOffSet = 0;
+				nScaleCount = scale - 16;
+			}
+
+			int nsuffle[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // Suffle Pixels
+			int nPosCounter = 0; // Suffle position counter
+			int nPos = 0; // Suffle start position
+
+			// as Scale 2 the it is double 1 pixel becomes 2
+			// {i, i, i, i, i, i, i} --> {0, 0, 1, 1, 2, 2, 3, 3}; 
+			for (int i = 0; i < 16; i++)
+			{
+				nsuffle[i] = nPos;
+				nPosCounter++;
+				if (nPosCounter >= scale)
+				{
+					nPosCounter = 0;
+					nPos++;
+				}
+
+			}
+
+			__m512i _reverse, _sx, _ex, _compare, _vecRead;
+			_sx = _mm512_set1_epi32(0);
+			_ex = _mm512_set1_epi32(ex);
+
+			_reverse = _mm512_set_epi32(nsuffle[15], nsuffle[14], nsuffle[13], nsuffle[12], nsuffle[11], nsuffle[10], nsuffle[9], nsuffle[8],
+				nsuffle[7], nsuffle[6], nsuffle[5], nsuffle[4], nsuffle[3], nsuffle[2], nsuffle[1], nsuffle[0]);
+			nPosCounter = 0;
+
+			int y = 0; int x = 0; int yS = 0;
+			int nTottle = scale;
+
+			for (y = 0; y < height; y++, yS++)
+			{
+				// Added extra Y Lines of x values
+				nTottle++;
+				if (nTottle < scale) y--;
+				if (nTottle >= scale) nTottle = 0;
+
+				nVecRead = (y * width) + 0;
+				nVecTarget = (yS * spr->width) + 0;
+				pTargetVector += nVecTarget;
+				for (x = 0; x < width; x += nReadCount, nVecRead += nReadCount, pTargetVector += 16, nVecTarget += 16)
+				{
+
+					_vecRead = _mm512_load_epi32((const int*)((olc::Pixel*)pColData.data() + nVecRead));
+					_mm512_storeu_epi32(pTargetVector, _mm512_permutexvar_epi32(_vecRead, _reverse));
+
+					// if out scale is greater than 8 times, i.e.10 then we need repeat the pixels
+					if (nScaleCount > 0)
+					{
+						_ex = _mm512_set1_epi32(nScaleCount + 1);
+
+						for (int i = 1; i < nScaleCount; i += 16)
+						{
+							pTargetVector += 16;
+							nVecTarget += 16;
+							nOffSet = (i * 16) - nScaleCount;
+							_sx = _mm512_set_epi32(i + 15, i + 14, i + 13, i + 12, i + 11, i + 10, i + 9, i + 8, i + 7, i + 6, i + 5, i + 4, i + 3, i + 2, i + 1, i);
+							_mm512_mask_store_epi32(pTargetVector, _mm512_cmpgt_epi32_mask(_ex, _sx), _mm512_permutexvar_epi32(_vecRead, _reverse));
+
+						}
+					}
+
+					// move back the pointer and vectors to get the offset bytes
+					pTargetVector -= nOffSet;
+					nVecTarget -= nOffSet;
+
+				}
+
+				pTargetVector -= nVecTarget;
+
+			}
+
+
+			// There can be some pixels left over, at most 1 full line
+			int nYPos = ((y - 1) * width);
+			int nYTarPos = (yS * (width * scale));
+			// check is there are left over pixels
+			if (nYTarPos < nVecTLen)
+			{
+				// if so process them
+				for (int i = nYPos; i < nVecRLen; i++)
+				{
+					for (int j = 0; j < scale; j++, nYTarPos++)
+					{
+						if (nYTarPos >= nVecTLen) break;
+						spr->pColData[nYTarPos] = pColData[i];
+					}
+				}
+			}
+
+			return spr;
+
+		}
+
+		/*--------------------------------------------------------------------------------------*/
 
 		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, const olc::vi2d& vSize)
 		{
@@ -4548,7 +5017,7 @@ namespace X11
 				nVecRead = (y * width) + 0;
 				nVecTarget = (yS * spr->width) + 0;
 				pTargetVector += nVecTarget;
-				for (x = 0; x < width; x += nReadCount, nVecRead += nReadCount, pTargetVector += 8, nVecTarget += 8)
+				for (x = 0; x < width; x += nReadCount, nVecRead += nReadCount, pTargetVector += 16, nVecTarget += 16)
 				{
 
 					_vecRead = _mm512_load_epi32((const int*)((olc::Pixel*)pColData.data() + nVecRead));
@@ -4559,11 +5028,11 @@ namespace X11
 					{
 						_ex = _mm512_set1_epi32(nScaleCount + 1);
 
-						for (int i = 1; i < nScaleCount; i += 8)
+						for (int i = 1; i < nScaleCount; i += 16)
 						{
-							pTargetVector += 8;
-							nVecTarget += 8;
-							nOffSet = (i * 8) - nScaleCount;
+							pTargetVector += 16;
+							nVecTarget += 16;
+							nOffSet = (i * 16) - nScaleCount;
 							_sx = _mm512_set_epi32(i + 15, i + 14, i + 13, i + 12, i + 11, i + 10, i + 9, i + 8, i + 7, i + 6, i + 5, i + 4, i + 3, i + 2, i + 1, i);
 							_mm512_mask_store_epi32(pTargetVector, _mm512_cmpgt_epi32_mask(_ex, _sx), _mm512_permutexvar_epi32(_vecRead, _reverse));
 
