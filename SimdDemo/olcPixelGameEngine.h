@@ -1180,6 +1180,21 @@ namespace olc
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT; (default NONE)</param>
 		void StoreSubSprite(olc::Sprite* pSubSprite, olc::vi2d vStartPos = {0, 0}, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
 
+
+		/// <summary>
+		/// Gets the Sub Sprite by ID
+		/// </summary>
+		/// <param name="id">The id value in the vector</param>
+		/// <returns>A pointer to a sprite, nullptr if not exist</returns>
+		olc::Sprite* GetStoredSubSprite(size_t id);
+
+		/// <summary>
+		/// Gets the ID of the sprite in the vector
+		/// </summary>
+		/// <param name="pSubSprite">A pointer to the Sub Sprite</param>
+		/// <returns>Returns the ID, -1 if not exist</returns>
+		size_t GetStoredSubSprite_id(olc::Sprite* pSubSprite);
+
 		/// <summary>
 		/// Gets a stored sub sprite from the Stored Sub Sprite Vector
 		/// </summary>
@@ -1187,10 +1202,10 @@ namespace olc
 		/// <param name="vSize">Size (width, height)</param>
 		/// <param name="scale">Scaler (>=1) (Default 1)</param>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT; (Default NONE)</param>
-		/// <returns>A pointer to a sprite, nullptr is not exist</returns>
+		/// <returns>A pointer to a sprite, nullptr if not exist</returns>
 		olc::Sprite* GetStoredSubSprite(olc::vi2d vStartPos, olc::vi2d vSize, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
 
-
+		
 
 	private:
 
@@ -4187,7 +4202,7 @@ namespace X11
 			scale = (scale <= 1) ? 1 : scale;
 			if (vSize.x < 1 || vSize.y < 1) return nullptr;
 
-			Sprite* spr = nullptr;
+			olc::Sprite* spr = nullptr;
 
 			for (int i = 0; i < vecSubSprites.size(); i++)
 			{
@@ -4203,6 +4218,47 @@ namespace X11
 			}
 
 			return spr;
+		}
+
+
+		olc::Sprite* Sprite::GetStoredSubSprite(size_t id)
+		{
+			if (id < 0) return nullptr;
+			if (id > vecSubSprites.size()) return nullptr;
+
+			olc::Sprite* spr = nullptr;
+
+			for (size_t i = 0; i < vecSubSprites.size(); i++)
+			{
+				if (std::get<5>(vecSubSprites[i]) == id)
+				{
+					// found it, break and return the sprite
+					spr = std::get<4>(vecSubSprites[i]);
+					break;
+				}
+			}
+
+			return spr;
+
+		}
+
+		size_t Sprite::GetStoredSubSprite_id(olc::Sprite* pSubSprite)
+		{
+			if (pSubSprite == nullptr) return -1;
+			size_t id = -1;
+
+			for (size_t i = 0; i < vecSubSprites.size(); i++)
+			{
+				if (std::get<4>(vecSubSprites[i]) == pSubSprite)
+				{
+					// found it, break and return the sprite
+					id = std::get<5>(vecSubSprites[i]);
+					break;
+				}
+			}
+
+			return id;
+
 		}
 
 

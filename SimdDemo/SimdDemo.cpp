@@ -138,7 +138,7 @@ public:
 		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
 		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
 		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
-		DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
+		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
 		EnableLayer(nLayerDrawSprite, true);
 
 		/*------- Level Partial Sprites 6 ------*/
@@ -199,7 +199,7 @@ public:
 		DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
 		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
 		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
-		DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
+		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
 		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
 
 		//
