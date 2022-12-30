@@ -2607,7 +2607,6 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(width, height);
 			spr->setInsturctionSet(getInsturctionSet());
-			//spr->setStoreSubSprites(getStoreSubSprites());
 
 			int sx = 0;
 			int ex = width;
@@ -2703,8 +2702,6 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(width, height);
 			spr->setInsturctionSet(getInsturctionSet());
-			//spr->setStoreSubSprites(getStoreSubSprites());
-
 
 			int sx = 0;
 			int ex = width;
@@ -2803,8 +2800,6 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(width, height);
 			spr->setInsturctionSet(getInsturctionSet());
-			//spr->setStoreSubSprites(getStoreSubSprites());
-
 
 			int sx = 0;
 			int ex = width;
@@ -2919,7 +2914,7 @@ namespace X11
 				// Return a copy of the sprite
 				spr = this->Duplicate();
 				spr->setInsturctionSet(getInsturctionSet());
-				//spr->setStoreSubSprites(getStoreSubSprites());
+				
 				if (bStoreSubSprite)
 				{
 					StoreSubSprite(spr, vStartPos, scale);
@@ -2962,30 +2957,29 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(width * scale, height * scale);
 			spr->setInsturctionSet(getInsturctionSet());
-			//spr->setStoreSubSprites(getStoreSubSprites());
-
+			
 			int ex = width;
 
-			int nVecTarget = 0; // Target vector position
-			float* pTargetVector = (float*)spr->pColData.data(); // Target vector pointer
-			size_t nVecTLen = spr->pColData.size(); // Target vector size
+			int nVecTarget = 0;										// Target vector position
+			float* pTargetVector = (float*)spr->pColData.data();	// Target vector pointer
+			size_t nVecTLen = spr->pColData.size();					// Target vector size
 
-			uint32_t nVecRead = 0; // Start position of read vector
-			size_t nVecRLen = pColData.size(); // Read vector size
+			uint32_t nVecRead = 0;									// Start position of read vector
+			size_t nVecRLen = pColData.size();						// Read vector size
 
-			int nReadCount = std::max(int(4 / scale), 1); // Number of pixels to be read in
+			int nReadCount = std::max(int(4 / scale), 1);			// Number of pixels to be read in
 
-			int nOffSet = 4 % scale; // Offset for left over pixels
-			uint32_t nScaleCount = 0; // Scale count used when the scale is greater than the register
+			int nOffSet = 4 % scale;								// Offset for left over pixels
+			uint32_t nScaleCount = 0;								// Scale count used when the scale is greater than the register
 			if (scale > 4)
 			{
 				nOffSet = 0;
 				nScaleCount = scale - 4;
 			}
 
-			int nsuffle[4] = { 0, 0, 0, 0 }; // Suffle Pixels
-			uint32_t nPosCounter = 0; // Suffle position counter
-			int nPos = 0; // Suffle start position
+			int nsuffle[4] = { 0, 0, 0, 0 };						// Suffle Pixels
+			uint32_t nPosCounter = 0;								// Suffle position counter
+			int nPos = 0;											// Suffle start position
 
 			// as Scale 2 the it is double 1 pixel becomes 2
 			// {i, i, i, i, i, i, i} --> {0, 0, 1, 1, 2, 2, 3, 3}; 
@@ -3026,8 +3020,6 @@ namespace X11
 				pTargetVector += nVecTarget;
 				for (x = 0; x < width; x += nReadCount, nVecRead += nReadCount, pTargetVector += 4, nVecTarget += 4)
 				{
-
-
 					_vecRead = _mm_load_ps((const float*)((olc::Pixel*)pColData.data() + nVecRead));
 					_result = _mm_permutevar_ps(_vecRead, _reverse);
 
@@ -3092,29 +3084,28 @@ namespace X11
 		{
 			olc::Sprite* spr = new olc::Sprite(width * scale, height * scale);
 			spr->setInsturctionSet(getInsturctionSet());
-			//spr->setStoreSubSprites(getStoreSubSprites());
 
 			int ex = width;
-			int nVecTarget = 0; // Target vector position
-			float* pTargetVector = (float*)spr->pColData.data(); // Target vector pointer
-			size_t nVecTLen = spr->pColData.size(); // Target vector size
+			int nVecTarget = 0;										// Target vector position
+			float* pTargetVector = (float*)spr->pColData.data();	// Target vector pointer
+			size_t nVecTLen = spr->pColData.size();					// Target vector size
 
-			int nVecRead = 0; // Start position of read vector
-			size_t nVecRLen = pColData.size(); // Read vector size
+			int nVecRead = 0;										// Start position of read vector
+			size_t nVecRLen = pColData.size();						// Read vector size
 
-			int nReadCount = std::max(int(8 / scale), 1); // Number of pixels to be read in
+			int nReadCount = std::max(int(8 / scale), 1);			// Number of pixels to be read in
 
-			int nOffSet = 8 % scale; // Offset for left over pixels
-			int nScaleCount = 0; // Scale count used when the scale is greater than the register
+			int nOffSet = 8 % scale;								// Offset for left over pixels
+			int nScaleCount = 0;									// Scale count used when the scale is greater than the register
 			if (scale > 8)
 			{
 				nOffSet = 0;
 				nScaleCount = scale - 8;
 			}
 
-			int nsuffle[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; // Suffle Pixels
-			uint32_t nPosCounter = 0; // Suffle position counter
-			int nPos = 0; // Suffle start position
+			int nsuffle[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };			// Suffle Pixels
+			uint32_t nPosCounter = 0;								// Suffle position counter
+			int nPos = 0;											// Suffle start position
 
 			// as Scale 2 the it is double 1 pixel becomes 2
 			// {i, i, i, i, i, i, i} --> {0, 0, 1, 1, 2, 2, 3, 3}; 
@@ -3133,7 +3124,6 @@ namespace X11
 			__m256i _reverse, _sx, _ex, _compare;
 			__m256 _result, _vecRead;
 
-			//_reverse = _mm256_set_epi32(0, 1, 2, 3, 4, 5, 6, 7);
 			_sx = _mm256_set1_epi32(0);
 			_ex = _mm256_set1_epi32(ex);
 
@@ -3220,8 +3210,7 @@ namespace X11
 		{
 			olc::Sprite* spr = new olc::Sprite(width * scale, height * scale);
 			spr->setInsturctionSet(getInsturctionSet());
-			//spr->setStoreSubSprites(getStoreSubSprites());
-
+			
 			int ex = width;
 
 			int nVecTarget = 0; // Target vector position
@@ -3387,7 +3376,6 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(vSize.x, vSize.y);
 			spr->setInsturctionSet(getInsturctionSet());
-			//spr->setStoreSubSprites(getStoreSubSprites());
 
 			int sx = 0;
 			int ex = vSize.x;
@@ -3402,6 +3390,7 @@ namespace X11
 				nOffSet = nOffSet - ex; // therefore the offset is 2
 
 			}
+			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
 			int nVecTarget = 0;
 			int* pTargetVector = (int*)spr->pColData.data();
@@ -3416,41 +3405,77 @@ namespace X11
 			_ex = _mm_set1_epi32(ex);
 			_result = _mm_set1_epi32(0xFF); // 0xFF = -1 -> True, 0x00 = 0 -> False;
 
-			for (int y = 0; y < vSize.y; y++)
+
+			// NOTE: We write out the full for-->loop for both High & Low speed
+			// If we put the condional statement between the for Y for loop we get a 'branch' in our assembly and lose any gains in proformance
+			if (bUseHighSpeed)
 			{
-				if (nVecRead > nVecRLen)
+				// High speed (up too 2times faster as we have no offset to manage)
+				for (int y = 0; y < vSize.y; y++)
 				{
-					break; // Break if we reached the end of the read vector
-				}
-				if (nVecTarget > nVecTLen) {
-					break; // break if we reached the end of the traget vector
+					if (nVecRead > nVecRLen)
+					{
+						break; // Break if we reached the end of the read vector
+					}
+					if (nVecTarget > nVecTLen) {
+						break; // break if we reached the end of the target vector
+					}
+
+					//Get the next position of the read vector
+					// Take note of (y + vPos.y), we need the position of y + the next row of y for the read vector (nVecRead)
+					nVecRead = ((y + vPos.y) * width) + vPos.x;
+					for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
+					{
+						// Load in the read vector
+						_vecRead = _mm_load_si128((const __m128i*)((olc::Pixel*)pColData.data() + nVecRead));
+						_mm_storeu_epi32(pTargetVector, _vecRead);
+						
+					}
+
+
 				}
 
-				//Get the next position of the read vector
-				// Take note of (y + vPos.y), we need the position of y + the next row of y for the read vector (nVecRead)
-				nVecRead = ((y + vPos.y) * width) + vPos.x;
-				for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
+			}
+			else
+			{
+				// We have an offset to manage
+				for (int y = 0; y < vSize.y; y++)
 				{
-					// Load in the read vector
-					_vecRead = _mm_load_si128((const __m128i*)((olc::Pixel*)pColData.data() + nVecRead));
+					if (nVecRead > nVecRLen)
+					{
+						break; // Break if we reached the end of the read vector
+					}
+					if (nVecTarget > nVecTLen) {
+						break; // break if we reached the end of the target vector
+					}
 
-					// We compare if the all the pixels ly within sx->ex, and pixel greater then ex are not process
-					_sx = _mm_set_epi32(x + 3, x + 2, x + 1, x);
+					//Get the next position of the read vector
+					// Take note of (y + vPos.y), we need the position of y + the next row of y for the read vector (nVecRead)
+					nVecRead = ((y + vPos.y) * width) + vPos.x;
+					for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
+					{
+						// Load in the read vector
+						_vecRead = _mm_load_si128((const __m128i*)((olc::Pixel*)pColData.data() + nVecRead));
 
-					// Take note there is 'no less than or equals', but if you just reverse the operands and use 'greater than' you get the excat same affect
-					_result = _mm_cmpgt_epi32(_ex, _sx);
+						// We compare if the all the pixels ly within sx->ex, and pixel greater then ex are not process
+						_sx = _mm_set_epi32(x + 3, x + 2, x + 1, x);
 
-					// Store only the pixels that are between sx-->ex
-					_mm_maskstore_epi32(pTargetVector, _result, _vecRead);
+						// Take note there is 'no less than or equals', but if you just reverse the operands and use 'greater than' you get the excat same affect
+						_result = _mm_cmpgt_epi32(_ex, _sx);
+
+						// Store only the pixels that are between sx-->ex
+						_mm_maskstore_epi32(pTargetVector, _result, _vecRead);
+
+					}
+
+					// shift the ptr for pTargetVector by the offset
+					// this ensures the ptr is always in the correct position for the next row of y
+					// Debug it to understand better
+					pTargetVector -= nOffSet;
+					nVecTarget -= nOffSet;
+
 
 				}
-
-				// shift the ptr for pTargetVector by the offset
-				// this ensures the ptr is always in the correct position for the next row of y
-				// Debug it to understand better
-				pTargetVector -= nOffSet;
-				nVecTarget -= nOffSet;
-
 
 			}
 
@@ -3483,8 +3508,7 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(vSize.x, vSize.y);
 			spr->setInsturctionSet(getInsturctionSet());
-			//spr->setStoreSubSprites(getStoreSubSprites());
-
+			
 			int sx = 0;
 			int ex = vSize.x;
 			int nOffSet = ex % 8;
@@ -3498,6 +3522,7 @@ namespace X11
 				nOffSet = nOffSet - ex; // therefore the offset is 2
 
 			}
+			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
 			int nVecTarget = 0;
 			int* pTargetVector = (int*)spr->pColData.data();
@@ -3512,43 +3537,79 @@ namespace X11
 			_ex = _mm256_set1_epi32(ex);
 			_result = _mm256_set1_epi32(0xFF); // 0xFF = -1 -> True, 0x00 = 0 -> False;
 
-			for (int y = 0; y < vSize.y; y++)
+			// NOTE: We write out the full for-->loop for both High & Low speed
+			// If we put the condional statement between the for Y for loop we get a 'branch' in our assembly and lose any gains in proformance
+			if (bUseHighSpeed)
 			{
-				if (nVecRead > nVecRLen)
+				// High speed (up too 2times faster as we have no offset to manage)
+				for (int y = 0; y < vSize.y; y++)
 				{
-					break; // Break if we reached the end of the read vector
+					if (nVecRead > nVecRLen)
+					{
+						break; // Break if we reached the end of the read vector
+					}
+					if (nVecTarget > nVecTLen) {
+						break; // break if we reached the end of the target vector
+					}
+
+					// Get the next position of the read vector
+					// Take note of (y + vPos.y), we need the position of y + the next row of y for the read vector (nVecRead)
+					nVecRead = ((y + vPos.y) * width) + vPos.x;
+					for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
+					{
+						// Load in the read vector
+						_vecRead = _mm256_load_si256((const __m256i*)((olc::Pixel*)pColData.data() + nVecRead));
+						_mm256_storeu_epi32(pTargetVector, _vecRead);
+					}
+
+
 				}
-				if (nVecTarget > nVecTLen) {
-					break; // break if we reached the end of the traget vector
-				}
-
-				//Get the next position of the read vector
-				// Take note of (y + vPos.y), we need the position of y + the next row of y for the read vector (nVecRead)
-				nVecRead = ((y + vPos.y) * width) + vPos.x;
-				for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
-				{
-					// Load in the read vector
-					_vecRead = _mm256_load_si256((const __m256i*)((olc::Pixel*)pColData.data() + nVecRead));
-
-					// We compare if the all the pixels ly within sx->ex, and pixel greater then ex are not process
-					_sx = _mm256_set_epi32(x + 7, x + 6, x + 5, x + 4, x + 3, x + 2, x + 1, x);
-
-					// Take note there is 'no less than or equals', but if you just reverse the operands and use 'greater than' you get the excat same affect
-					_result = _mm256_cmpgt_epi32(_ex, _sx);
-
-					// Store only the pixels that are between sx-->ex
-					_mm256_maskstore_epi32(pTargetVector, _result, _vecRead);
-					//_mm256_storeu_epi32(pTargetVector, _vecRead);
-				}
-
-				// shift the ptr for pTargetVector by the offset
-				// this ensures the ptr is always in the correct position for the next row of y
-				// Debug it to understand better
-				pTargetVector -= nOffSet;
-				nVecTarget -= nOffSet;
-
 
 			}
+			else
+			{
+				// We have an offset to manage
+				for (int y = 0; y < vSize.y; y++)
+				{
+					if (nVecRead > nVecRLen)
+					{
+						break; // Break if we reached the end of the read vector
+					}
+					if (nVecTarget > nVecTLen) {
+						break; // break if we reached the end of the target vector
+					}
+
+					// Get the next position of the read vector
+					// Take note of (y + vPos.y), we need the position of y + the next row of y for the read vector (nVecRead)
+					nVecRead = ((y + vPos.y) * width) + vPos.x;
+					for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
+					{
+						// Load in the read vector
+						_vecRead = _mm256_load_si256((const __m256i*)((olc::Pixel*)pColData.data() + nVecRead));
+
+						// We compare if the all the pixels ly within sx->ex, and pixel greater then ex are not process
+						_sx = _mm256_set_epi32(x + 7, x + 6, x + 5, x + 4, x + 3, x + 2, x + 1, x);
+
+						// Take note there is 'no less than or equals', but if you just reverse the operands and use 'greater than' you get the excat same affect
+						_result = _mm256_cmpgt_epi32(_ex, _sx);
+
+						// Store only the pixels that are between sx-->ex
+						_mm256_maskstore_epi32(pTargetVector, _result, _vecRead);
+						
+					}
+
+					// shift the ptr for pTargetVector by the offset
+					// this ensures the ptr is always in the correct position for the next row of y
+					// Debug it to understand better
+					pTargetVector -= nOffSet;
+					nVecTarget -= nOffSet;
+
+
+				}
+
+			}
+
+		
 
 			//Clean up any left over pixels
 			_vecRead = _mm256_set1_epi32(0);
@@ -3578,8 +3639,7 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(vSize.x, vSize.y);
 			spr->setInsturctionSet(getInsturctionSet());
-			//spr->setStoreSubSprites(getStoreSubSprites());
-
+			
 			int sx = 0;
 			int ex = vSize.x;
 			int nOffSet = ex % 16;
@@ -3594,6 +3654,9 @@ namespace X11
 
 			}
 
+			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
+
+
 			int nVecTarget = 0;
 			int* pTargetVector = (int*)spr->pColData.data();
 			size_t nVecTLen = spr->pColData.size();
@@ -3607,38 +3670,73 @@ namespace X11
 			_ex = _mm512_set1_epi32(ex);
 			_result = _mm512_set1_epi32(0xFF); // 0xFF = -1 -> True, 0x00 = 0 -> False;
 
-			for (int y = 0; y < vSize.y; y++)
+			// NOTE: We write out the full for-->loop for both High & Low speed
+			// If we put the condional statement between the for Y for loop we get a 'branch' in our assembly and lose any gains in proformance
+			if (bUseHighSpeed)
 			{
-				if (nVecRead > nVecRLen)
+				// High speed (up too 2times faster as we have no offset to manage)
+				for (int y = 0; y < vSize.y; y++)
 				{
-					break; // Break if we reached the end of the read vector
-				}
-				if (nVecTarget > nVecTLen) {
-					break; // break if we reached the end of the target vector
+					if (nVecRead > nVecRLen)
+					{
+						break; // Break if we reached the end of the read vector
+					}
+					if (nVecTarget > nVecTLen) {
+						break; // break if we reached the end of the target vector
+					}
+
+					//Get the next position of the read vector
+					// Take note of (y + vPos.y), we need the position of y + the next row of y for the read vector (nVecRead)
+					nVecRead = ((y + vPos.y) * width) + vPos.x;
+					for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
+					{
+						// Load in the read vector
+						_vecRead = _mm512_load_si512((const __m512i*)((olc::Pixel*)pColData.data() + nVecRead));
+						_mm512_storeu_epi32(pTargetVector, _vecRead);
+
+					}
+
+
 				}
 
-				//Get the next position of the read vector
-				// Take note of (y + vPos.y), we need the position of y + the next row of y for the read vector (nVecRead)
-				nVecRead = ((y + vPos.y) * width) + vPos.x;
-				for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
+			}
+			else
+			{
+				// We have an offset to manage
+				for (int y = 0; y < vSize.y; y++)
 				{
-					// Load in the read vector
-					_vecRead = _mm512_load_si512((const __m512i*)((olc::Pixel*)pColData.data() + nVecRead));
+					if (nVecRead > nVecRLen)
+					{
+						break; // Break if we reached the end of the read vector
+					}
+					if (nVecTarget > nVecTLen) {
+						break; // break if we reached the end of the target vector
+					}
 
-					// we compare if the all the pixels ly within sx->ex, and pixel greater then ex are not process
-					_sx = _mm512_set_epi32(x + 15, x + 14, x + 13, x + 12, x + 11, x + 10, x + 9, x + 8, x + 7, x + 6, x + 5, x + 4, x + 3, x + 2, x + 1, x);
+					//Get the next position of the read vector
+					// Take note of (y + vPos.y), we need the position of y + the next row of y for the read vector (nVecRead)
+					nVecRead = ((y + vPos.y) * width) + vPos.x;
+					for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
+					{
+						// Load in the read vector
+						_vecRead = _mm512_load_si512((const __m512i*)((olc::Pixel*)pColData.data() + nVecRead));
 
-					// Take note there is 'no less than or equals', but if you just reverse the operands and use 'greater than' you get the excat same affect
-					// Store only the pixels that are between sx-->ex
-					_mm512_mask_store_epi32(pTargetVector, _mm512_cmpgt_epi32_mask(_ex, _sx), _vecRead);
+						// we compare if the all the pixels ly within sx->ex, and pixel greater then ex are not process
+						_sx = _mm512_set_epi32(x + 15, x + 14, x + 13, x + 12, x + 11, x + 10, x + 9, x + 8, x + 7, x + 6, x + 5, x + 4, x + 3, x + 2, x + 1, x);
+
+						// Take note there is 'no less than or equals', but if you just reverse the operands and use 'greater than' you get the excat same affect
+						// Store only the pixels that are between sx-->ex
+						_mm512_mask_store_epi32(pTargetVector, _mm512_cmpgt_epi32_mask(_ex, _sx), _vecRead);
+					}
+
+					// shift the ptr for pTargetVector by the offset
+					// this ensures the ptr is always in the correct position for the next row of y
+					// Debug it to understand better
+					pTargetVector -= nOffSet;
+					nVecTarget -= nOffSet;
+
+
 				}
-
-				// shift the ptr for pTargetVector by the offset
-				// this ensures the ptr is always in the correct position for the next row of y
-				// Debug it to understand better
-				pTargetVector -= nOffSet;
-				nVecTarget -= nOffSet;
-
 
 			}
 
@@ -3660,7 +3758,6 @@ namespace X11
 				StoreSubSprite(spr, vPos);
 			}
 
-
 			return spr;
 
 		}
@@ -3669,7 +3766,9 @@ namespace X11
 
 		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget)
 		{
-			if (getInsturctionSet() == SIMD_NONE) return nullptr;
+			// NOTE: This method is used soley to draw to the draw target
+
+			if (getInsturctionSet() == SIMD_NONE) return pdrawTarget;
 
 			/*---- Non-SIMD Vs SIMD*/
 
@@ -3680,7 +3779,7 @@ namespace X11
 				Most developers prefer to stay with one language within a method.
 				As these methods are SIMD executions, then write it all in SIMD, therefore there is no surprises later when another developer
 				needs to debug.
-				They are expecting SIMD, and they get SIMD
+				They are expecting SIMD, then they get SIMD
 				Finally the SIMD code below should be a tiny bit faster, but it would be impossible to measure
 
 				Non SIMD Code:
@@ -3726,39 +3825,35 @@ namespace X11
 			std::vector<int> vecPositions = { vPos.y, vPos.x, height, width, vPos.y, vPos.x, 0, 0 };
 			int* pPositions = vecPositions.data();
 
-			__m128i reg1, reg2, reg3, reg4, reg5, _comp;
+			__m128i _reg1, _reg2, _reg3, _reg4, _reg5, _compare;
 
-			reg1 = _mm_set_epi32(width, height, 0, 0);							// Holds width and height
-			reg2 = _mm_set_epi32(vPos.x, vPos.y, 0, 0);							// Holds vPos.x and vPos.y
-			reg3 = _mm_add_epi32(reg1, reg2);									// nFullWidth = vPos.x + width, nFullHeight = vPos.y + height;
-			reg4 = _mm_set_epi32(pdrawTarget->width, pdrawTarget->height, 0, 0);// Holds pdrawTarget->width, pdrawTarget->height
-			_comp = _mm_cmpgt_epi32(reg3, reg4);								// if (nFullWidth >= pdrawTarget->width) (true false)
-			reg5 = _mm_sub_epi32(reg3, reg4);									// nWidth = nFullWidth - pdrawTarget->width, nheight = nheight - pdrawTarget->height,
-			reg5 = _mm_sub_epi32(reg1, reg5);									// nWidth = width - nWidth, nHeight = height - nHeight;
-			_mm_maskstore_epi32(pPositions, _comp, reg5);						// We only store the computed values of reg5, if _comp is set. i.e. nFullWidth is greater than pdrawTarget->width 
+			_reg1 = _mm_set_epi32(width, height, 0, 0);								// Holds width and height
+			_reg2 = _mm_set_epi32(vPos.x, vPos.y, 0, 0);							// Holds vPos.x and vPos.y
+			_reg3 = _mm_add_epi32(_reg1, _reg2);									// nFullWidth = vPos.x + width, nFullHeight = vPos.y + height;
+			_reg4 = _mm_set_epi32(pdrawTarget->width, pdrawTarget->height, 0, 0);	// Holds pdrawTarget->width, pdrawTarget->height
+			_compare = _mm_cmpgt_epi32(_reg3, _reg4);								// if (nFullWidth >= pdrawTarget->width) (true false)
+			_reg5 = _mm_sub_epi32(_reg3, _reg4);									// nWidth = nFullWidth - pdrawTarget->width, nheight = nheight - pdrawTarget->height,
+			_reg5 = _mm_sub_epi32(_reg1, _reg5);									// nWidth = width - nWidth, nHeight = height - nHeight;
+			_mm_maskstore_epi32(pPositions, _compare, _reg5);						// We only store the computed values of reg5, if _comp is set. i.e. nFullWidth is greater than pdrawTarget->width 
 
 			// Now lets get the nXStart, nYStart 
-
-																				// Note the vector is read in backwards, (right to left) <---    <---    <--- 					
-			pPositions += 4;													// Move our pionter down by 4 so we are pointing to {... vPos.y, vPos.x, 0, 0}
-			reg1 = _mm_set1_epi32(0);											// Clear reg1 to 0, (vPos.x < 0) ? vPos.x * -1 : 0 <- this zero
-			_comp = _mm_cmpgt_epi32(reg1, reg2);								//(vPos.x < 0)?,  (vPos.y < 0)?
-			reg5 = _mm_abs_epi32(reg2);											// vPos.x * -1, vPos.y * -1. Abs will resturn positive absolute numbers, we do not need to muliply
-			_mm_maskstore_epi32(pPositions, _comp, reg5);						// We only change the values of nXStart & nYStart if _comp is set (nXStart = (vPos.x < 0) ? vPos.x * -1)
+																					// Note the vector is read in backwards, (right to left) <---    <---    <--- 					
+			pPositions += 4;														// Move our pionter down by 4 so we are pointing to {... vPos.y, vPos.x, 0, 0}
+			_reg1 = _mm_set1_epi32(0);												// Clear reg1 to 0, (vPos.x < 0) ? vPos.x * -1 : 0 <- this zero
+			_compare = _mm_cmpgt_epi32(_reg1, _reg2);								//(vPos.x < 0)?,  (vPos.y < 0)?
+			_reg5 = _mm_abs_epi32(_reg2);											// vPos.x * -1, vPos.y * -1. Abs will resturn positive absolute numbers, we do not need to muliply
+			_mm_maskstore_epi32(pPositions, _compare, _reg5);						// We only change the values of nXStart & nYStart if _comp is set (nXStart = (vPos.x < 0) ? vPos.x * -1)
 
 			// Now lets get the nXPos, nYPso
 
-			reg2 = _mm_set_epi32(0, 0, vPos.x, vPos.y);							// Tottle the reg2 so that 0's will cause nXStart & nYStart results not to be affected
-			_comp = _mm_cmpgt_epi32(reg1, reg2);								// (vPos.x < 0)?,  (vPos.y < 0)? . We reuse reg1 as it is already set to 0's
-			_mm_maskstore_epi32(pPositions, _comp, reg1);						// Ee only change the values of nXPos & nYPos if _comp is set (vPos.x < 0) ? 0 : vPos.x;
+			_reg2 = _mm_set_epi32(0, 0, vPos.x, vPos.y);							// Tottle the reg2 so that 0's will cause nXStart & nYStart results not to be affected
+			_compare = _mm_cmpgt_epi32(_reg1, _reg2);								// (vPos.x < 0)?,  (vPos.y < 0)? . We reuse _reg1 as it is already set to 0's
+			_mm_maskstore_epi32(pPositions, _compare, _reg1);						// We only change the values of nXPos & nYPos if _comp is set (vPos.x < 0) ? 0 : vPos.x;
 
-			//Final Result = std::vector<int> vecPositions = { vPos.y, vPos.x, nHeight, nWidth, nYPos, nXPos, nYStart, nXStart };
+			//Final Result => std::vector<int> vecPositions = { vPos.y, vPos.x, nHeight, nWidth, nYPos, nXPos, nYStart, nXStart };
 			
 			/*---- END Non-SIMD Vs SIMD ---*/
 
-
-
-			// NOTE: This method is used soley to draw to the draw target
 			switch (getInsturctionSet())
 			{
 
@@ -3814,14 +3909,13 @@ namespace X11
 			int ex = nWidth;
 
 			// Get if we have an offset to manage
-			// Try to keep your spites in even mulitples of 8 (8, 16, 24, 32, 40... 80, 88, 96, 104)
+			// Try to keep your spites width in even mulitples of 4/8 (4, 8, 16, 24, 32, 40... 80, 88, 96, 104)
 			// In this way most of your sprites will fall into the the "high speed" processing below
 			int nOffSet = nWidth % 4;
 			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
-			__m128i _reverse, _sx, _ex, _compare, _vecRead;
+			__m128i _sx, _ex, _compare, _vecRead;
 
-			_reverse = _mm_set_epi32(0, 1, 2, 3);
 			_sx = _mm_set1_epi32(0);
 			_ex = _mm_set1_epi32(ex);
 
@@ -3851,6 +3945,7 @@ namespace X11
 
 
 				}
+
 			}
 			else
 			{
@@ -3876,8 +3971,8 @@ namespace X11
 
 					pTargetVector -= nVecTarget; // reset the pointer to 0 position
 
-
 				}
+
 			}
 
 
@@ -3915,16 +4010,16 @@ namespace X11
 			int ex = nWidth;
 
 			// Get if we have an offset to manage
-			// Try to keep your spites in even mulitples of 8 (8, 16, 24, 32, 40... 80, 88, 96, 104)
+			// Try to keep your spites width in even mulitples of 4/8 (4, 8, 16, 24, 32, 40... 80, 88, 96, 104)
 			// In this way most of your sprites will fall into the the "high speed" processing
 			int nOffSet = nWidth % 8;
 			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
 
 			// Set up registers
-			__m256i _reverse, _sx, _ex, _compare;
+			__m256i _sx, _ex, _compare;
 			__m256  _vecRead;
-			_reverse = _mm256_set_epi32(0, 1, 2, 3, 4, 5, 6, 7);
+
 			_sx = _mm256_set1_epi32(0);
 			_ex = _mm256_set1_epi32(ex);
 
@@ -3954,7 +4049,6 @@ namespace X11
 					}
 
 					pTargetVector -= nVecTarget; // reset the pointer to 0 position
-
 
 				}
 			}
@@ -4019,14 +4113,12 @@ namespace X11
 			int ex = nWidth;
 
 			// Get if we have an offset to manage
-			// Try to keep your spites in even mulitples of 8 (8, 16, 24, 32, 40... 80, 88, 96, 104)
+			// Try to keep your spites width in even mulitples of 4/8 (4, 8, 16, 24, 32, 40... 80, 88, 96, 104)
 			// In this way most of your sprites will fall into the the "high speed" processing
 			int nOffSet = nWidth % 16;
 			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
-			__m512i _reverse, _sx, _ex, _vecRead;
-
-			_reverse = _mm512_set_epi32(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+			__m512i  _sx, _ex, _vecRead;
 
 			_sx = _mm512_set1_epi32(0);
 			_ex = _mm512_set1_epi32(ex);
@@ -4039,7 +4131,6 @@ namespace X11
 			if (bUseHighSpeed)
 			{
 				// High speed (up too 2times faster as we have no offset to manage)
-				// Low speed as we have an offset to manage
 				for (int y = nYStart; y < nHeight; y++, nTargetY++)
 				{
 					// Get next Target Vector position, but if we are out of bounds on the target we break
@@ -4101,7 +4192,6 @@ namespace X11
 			if (bStoreSubSprite)
 			{
 				
-				
 				olc::vi2d vScaleSize = { this->width * (int)scale, this->height * (int)scale };
 				olc::Sprite* spr = GetStoredSubSprite(vStartPos, vScaleSize, scale, (olc::Sprite::Flip)flip);
 				if (spr != nullptr)
@@ -4113,10 +4203,10 @@ namespace X11
 
 			}
 
-			//1: Lets flip it (if Store Sub Sprites in enable a copy will be returned)
+			// Lets flip it (if Store Sub Sprites in enable a copy will be returned)
 			olc::Sprite* sprFlipped = this->Duplicate_SIMD((olc::Sprite::Flip)flip);
 
-					// Draw the Sprite to the draw target at the position requested
+			// Draw the Sprite to the draw target at the position requested
 			sprFlipped->Duplicate_SIMD(vPos, pdrawTarget);
 			if (bStoreSubSprite)
 			{
@@ -4250,7 +4340,6 @@ namespace X11
 			return spr;
 		}
 
-
 		olc::Sprite* Sprite::GetStoredSubSprite(size_t id)
 		{
 			if (id < 0) return nullptr;
@@ -4291,8 +4380,6 @@ namespace X11
 
 		}
 
-
-
 		void Sprite::StoreSubSprite(olc::Sprite* pSubSprite, olc::vi2d vStartPos, uint32_t scale, olc::Sprite::Flip flip)
 		{
 			// Pre-checks
@@ -4323,7 +4410,7 @@ namespace X11
 
 
 
-		/*--------------------------- SIMD Instruction set -------------------------------------*/
+		/*--------------------------- END SIMD Instruction set -------------------------------------*/
 
 
 		olc::vi2d olc::Sprite::Size() const
