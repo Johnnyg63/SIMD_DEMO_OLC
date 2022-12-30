@@ -2907,8 +2907,6 @@ namespace X11
 				
 			}
 
-
-
 			if (scale <= 1)
 			{
 				// Return a copy of the sprite

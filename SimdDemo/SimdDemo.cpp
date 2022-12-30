@@ -165,7 +165,7 @@ public:
 		nLayerBackGround = CreateLayer();
 		SetDrawTarget(nLayerBackGround);
 		Clear_SIMD(olc::WHITE);
-		//DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
+		DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
 		EnableLayer(nLayerBackGround, true);
 
 
