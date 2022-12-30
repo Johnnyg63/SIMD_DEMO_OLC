@@ -1307,8 +1307,9 @@ namespace olc
 		/// </summary>
 		/// <param name="vPos">Start position in the draw target (x,y)</param>
 		/// <param name="pdrawTarget">A pointer to the drawtarget</param>
+		/// <param name="vecPositions">Position Vector that is used to crop the sprite if out of bounds</param>
 		/// <returns>A pointer to the draw target</returns>
-		olc::Sprite* Duplicate_SSE(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget);
+		olc::Sprite* Duplicate_SSE(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions);
 
 		/// <summary>
 		/// Draws a duplicate sprite to the draw target, using AVX (256bit) Instruction Set
@@ -1316,8 +1317,9 @@ namespace olc
 		/// </summary>
 		/// <param name="vPos">Start position in the draw target (x,y)</param>
 		/// <param name="pdrawTarget">A pointer to the drawtarget</param>
+		/// <param name="vecPositions">Position Vector that is used to crop the sprite if out of bounds</param>
 		/// <returns>A pointer to the draw target</returns>
-		olc::Sprite* Duplicate_AVX256(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget);
+		olc::Sprite* Duplicate_AVX256(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions);
 
 		/// <summary>
 		/// Draws a duplicate sprite to the draw target, using AVX512 (512bit) Instruction Set
@@ -1325,8 +1327,9 @@ namespace olc
 		/// </summary>
 		/// <param name="vPos">Start position in the draw target (x,y)</param>
 		/// <param name="pdrawTarget">A pointer to the drawtarget</param>
+		/// <param name="vecPositions">Position Vector that is used to crop the sprite if out of bounds</param>
 		/// <returns>A pointer to the draw target</returns>
-		olc::Sprite* Duplicate_AVX512(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget);
+		olc::Sprite* Duplicate_AVX512(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions);
 
 
 		/*-------------------------- END SIMD INSTRUCTIONS CHANGES --------------------------------------------------------*/
@@ -3666,64 +3669,135 @@ namespace X11
 
 		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget)
 		{
+			if (getInsturctionSet() == SIMD_NONE) return nullptr;
+
+			/*---- Non-SIMD Vs SIMD*/
+
+			/*
+				There is no real performance gain using either of the executions (Non-SIMD, SIMD)
+				Always remember it is near impossible to beat the complier. You might ask then why write it in SIMD at all?
+				Well, when you are developing low level code, it is difficult to jump between languages.
+				Most developers prefer to stay with one language within a method.
+				As these methods are SIMD executions, then write it all in SIMD, therefore there is no surprises later when another developer
+				needs to debug.
+				They are expecting SIMD, and they get SIMD
+				Finally the SIMD code below should be a tiny bit faster, but it would be impossible to measure
+
+				Non SIMD Code:
+
+				// Ok we need to ensure the sprite can fit on the layer (pdrawTarget)
+				// Work out if the sprite is out of bounds and crop the sprite to fit into the bounds
+
+				int nFullWidth = vPos.x + width;
+				int nFullHeight = vPos.y + height;
+				int nWidth = width; //std::min(nFullWidth, pdrawTarget->width);
+				int nHeight = height; // std::min(nFullHeight, pdrawTarget->height);
+
+				if (nFullWidth >= pdrawTarget->width)
+				{
+					// Get the new width for off layer sprite
+					nWidth = nFullWidth - pdrawTarget->width;
+					nWidth = width - nWidth;
+				}
+
+				if (nFullHeight >= pdrawTarget->height)
+				{
+					// Get the new height for off layer sprite
+					nHeight = nFullHeight - pdrawTarget->height;
+					nHeight = height - nHeight;
+				}
+
+				// Get the new Start Position for off layer sprite
+				int nXStart = (vPos.x < 0) ? vPos.x * -1 : 0;
+				int nYStart = (vPos.y < 0) ? vPos.y * -1 : 0;
+
+				// Get the new vPosition for off layer sprite
+				int nXPos = (vPos.x < 0) ? 0 : vPos.x;
+				int nYPos = (vPos.y < 0) ? 0 : vPos.y;
+
+				std::vector<int> vecPositions = { vPos.y, vPos.x, nHeight, nWidth, nYPos, nXPos, nYStart, nXStart };
+
+			*/
+
+			// Ok we need to ensure the sprite can fit on the layer (pdrawTarget)
+			// Work out if the sprite is out of bounds and crop the sprite to fit into the bounds
+
+			// Vector of position: Order is important, SIMD will read the vector in backwards, (right to left) <--- 
+			std::vector<int> vecPositions = { vPos.y, vPos.x, height, width, vPos.y, vPos.x, 0, 0 };
+			int* pPositions = vecPositions.data();
+
+			__m128i reg1, reg2, reg3, reg4, reg5, _comp;
+
+			reg1 = _mm_set_epi32(width, height, 0, 0);							// Holds width and height
+			reg2 = _mm_set_epi32(vPos.x, vPos.y, 0, 0);							// Holds vPos.x and vPos.y
+			reg3 = _mm_add_epi32(reg1, reg2);									// nFullWidth = vPos.x + width, nFullHeight = vPos.y + height;
+			reg4 = _mm_set_epi32(pdrawTarget->width, pdrawTarget->height, 0, 0);// Holds pdrawTarget->width, pdrawTarget->height
+			_comp = _mm_cmpgt_epi32(reg3, reg4);								// if (nFullWidth >= pdrawTarget->width) (true false)
+			reg5 = _mm_sub_epi32(reg3, reg4);									// nWidth = nFullWidth - pdrawTarget->width, nheight = nheight - pdrawTarget->height,
+			reg5 = _mm_sub_epi32(reg1, reg5);									// nWidth = width - nWidth, nHeight = height - nHeight;
+			_mm_maskstore_epi32(pPositions, _comp, reg5);						// We only store the computed values of reg5, if _comp is set. i.e. nFullWidth is greater than pdrawTarget->width 
+
+			// Now lets get the nXStart, nYStart 
+
+																				// Note the vector is read in backwards, (right to left) <---    <---    <--- 					
+			pPositions += 4;													// Move our pionter down by 4 so we are pointing to {... vPos.y, vPos.x, 0, 0}
+			reg1 = _mm_set1_epi32(0);											// Clear reg1 to 0, (vPos.x < 0) ? vPos.x * -1 : 0 <- this zero
+			_comp = _mm_cmpgt_epi32(reg1, reg2);								//(vPos.x < 0)?,  (vPos.y < 0)?
+			reg5 = _mm_abs_epi32(reg2);											// vPos.x * -1, vPos.y * -1. Abs will resturn positive absolute numbers, we do not need to muliply
+			_mm_maskstore_epi32(pPositions, _comp, reg5);						// We only change the values of nXStart & nYStart if _comp is set (nXStart = (vPos.x < 0) ? vPos.x * -1)
+
+			// Now lets get the nXPos, nYPso
+
+			reg2 = _mm_set_epi32(0, 0, vPos.x, vPos.y);							// Tottle the reg2 so that 0's will cause nXStart & nYStart results not to be affected
+			_comp = _mm_cmpgt_epi32(reg1, reg2);								// (vPos.x < 0)?,  (vPos.y < 0)? . We reuse reg1 as it is already set to 0's
+			_mm_maskstore_epi32(pPositions, _comp, reg1);						// Ee only change the values of nXPos & nYPos if _comp is set (vPos.x < 0) ? 0 : vPos.x;
+
+			//Final Result = std::vector<int> vecPositions = { vPos.y, vPos.x, nHeight, nWidth, nYPos, nXPos, nYStart, nXStart };
+			
+			/*---- END Non-SIMD Vs SIMD ---*/
+
+
+
 			// NOTE: This method is used soley to draw to the draw target
 			switch (getInsturctionSet())
 			{
 
 			case SIMD_AVX:
 			case SIMD_AVX2:
-				return Duplicate_AVX256(vPos, pdrawTarget);
+				return Duplicate_AVX256(vPos, pdrawTarget, vecPositions);
 				break;
 
 			case SIMD_SSE:
 			case SIMD_SSE2:
 			case SIMD_SSE3:
 			case SIMD_SSE41:
-				return Duplicate_SSE(vPos, pdrawTarget);
+				return Duplicate_SSE(vPos, pdrawTarget, vecPositions);
 				break;
 
 			case SIMD_AVX512:
-				return Duplicate_AVX512(vPos, pdrawTarget);
+				return Duplicate_AVX512(vPos, pdrawTarget, vecPositions);
 				break;
 
 			default:
 				break;
 			}
+
 			return pdrawTarget;
 
 
 		}
 
-		olc::Sprite* Sprite::Duplicate_SSE(const olc::vi2d& vPos, olc::Sprite* pdrawTarget)
+		olc::Sprite* Sprite::Duplicate_SSE(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions)
 		{
-			// Ok we need to ensure the sprite can fit on the layer (pdrawTarget)
-			// lets add the with of the sprite to pos.x 
-			int nFullWidth = vPos.x + width;
-			int nFullHeight = vPos.y + height;
-			int nWidth = width; //std::min(nFullWidth, pdrawTarget->width);
-			int nHeight = height; // std::min(nFullHeight, pdrawTarget->height);
-
-			if (nFullWidth >= pdrawTarget->width)
-			{
-				// Get the new width for off layer sprite
-				nWidth = nFullWidth - pdrawTarget->width;
-				nWidth = width - nWidth;
-			}
-
-			if (nFullHeight >= pdrawTarget->height)
-			{
-				// get the new height for off layer sprite
-				nHeight = nFullHeight - pdrawTarget->height;
-				nHeight = height - nHeight;
-			}
-
-			// Get the new Start Position for off layer sprite
-			int nXStart = (vPos.x < 0) ? vPos.x * -1 : 0;
-			int nYStart = (vPos.y < 0) ? vPos.y * -1 : 0;
-
-			// Get the new vPosition for off layer sprite
-			int nXPos = (vPos.x < 0) ? 0 : vPos.x;
-			int nYPos = (vPos.y < 0) ? 0 : vPos.y;
+			// Create ints to represent the vector positions
+			// makes life easier for debugging and creation of the for loop for SIMD
+			// std::vector<int> vecPositions = { vPos.y, vPos.x, nHeight, nWidth, nYPos, nXPos, nYStart, nXStart };
+			int nHeight = vecPositions[2];
+			int nWidth = vecPositions[3];
+			int nYPos = vecPositions[4];
+			int nXPos = vecPositions[5];
+			int nYStart = vecPositions[6];
+			int nXStart = vecPositions[7];
 
 			// Get the target layer vector pointer
 			int nVecTarget = (nYPos * pdrawTarget->width) + nXPos;
@@ -3813,98 +3887,18 @@ namespace X11
 
 		}
 
-		olc::Sprite* Sprite::Duplicate_AVX256(const olc::vi2d& vPos, olc::Sprite* pdrawTarget)
+		olc::Sprite* Sprite::Duplicate_AVX256(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions)
 		{
 
-			/*---- Non-SIMD Vs SIMD*/
-
-			/*
-				There is no real performance gain using either of the executions (Non-SIMD, SIMD)
-				Always remember it is near impossible to beat the complier. You might ask then why write it in SIMD at all? 
-				Well, when you are developing low level code, it is difficult to jump between languages. 
-				Most developers prefer to stay with one language within a method. 
-				As these methods are SIMD executions, then write it all in SIMD, therefore there is no surprises later when another developer 
-				needs to debug. 
-				They are expecting SIMD, and they get SIMD
-				Finally the SIMD code below should be a tiny bit faster, but it would be impossible to measure
-
-				Non SIMD Code:
-
-				// Ok we need to ensure the sprite can fit on the layer (pdrawTarget)
-				// Work out if the sprite is out of bounds and crop the sprite to fit into the bounds
-
-				int nFullWidth = vPos.x + width;
-				int nFullHeight = vPos.y + height;
-				int nWidth = width; //std::min(nFullWidth, pdrawTarget->width);
-				int nHeight = height; // std::min(nFullHeight, pdrawTarget->height);
-			
-				if (nFullWidth >= pdrawTarget->width)
-				{
-					// Get the new width for off layer sprite
-					nWidth = nFullWidth - pdrawTarget->width;
-					nWidth = width - nWidth;
-				}
-
-				if (nFullHeight >= pdrawTarget->height)
-				{
-					// Get the new height for off layer sprite
-					nHeight = nFullHeight - pdrawTarget->height;
-					nHeight = height - nHeight;
-				}
-
-				// Get the new Start Position for off layer sprite
-				int nXStart = (vPos.x < 0) ? vPos.x * -1 : 0;
-				int nYStart = (vPos.y < 0) ? vPos.y * -1 : 0;
-
-				// Get the new vPosition for off layer sprite
-				int nXPos = (vPos.x < 0) ? 0 : vPos.x;
-				int nYPos = (vPos.y < 0) ? 0 : vPos.y;
-
-			*/
-
-			// Ok we need to ensure the sprite can fit on the layer (pdrawTarget)
-			// Work out if the sprite is out of bounds and crop the sprite to fit into the bounds
-
-			std::vector<int> vecPositions = { vPos.y, vPos.x, height, width, vPos.y, vPos.x, 0, 0};
-			int* pPositions = vecPositions.data();
-
-			__m128i reg1, reg2, reg3, reg4, reg5, _comp;
-
-			reg1 = _mm_set_epi32(width, height,0 , 0);							// Holds width and height
-			reg2 = _mm_set_epi32(vPos.x, vPos.y, 0, 0);							// Holds vPos.x and vPos.y
-			reg3 = _mm_add_epi32(reg1, reg2);									// nFullWidth = vPos.x + width, nFullHeight = vPos.y + height;
-			reg4 = _mm_set_epi32(pdrawTarget->width, pdrawTarget->height, 0, 0);// Holds pdrawTarget->width, pdrawTarget->height
-			_comp = _mm_cmpgt_epi32(reg3, reg4);								// if (nFullWidth >= pdrawTarget->width) (true false)
-			reg5 = _mm_sub_epi32(reg3, reg4);									// nWidth = nFullWidth - pdrawTarget->width, nheight = nheight - pdrawTarget->height,
-			reg5 = _mm_sub_epi32(reg1, reg5);									// nWidth = width - nWidth, nHeight = height - nHeight;
-			_mm_maskstore_epi32(pPositions, _comp, reg5);						// We only store the computed values of reg5, if _comp is set. i.e. nFullWidth is greater than pdrawTarget->width 
-
-																				// Now lets get the nXStart, nYStart 
-			
-																				// Note the vector is read in backwards, (right to left) <---    <---    <--- 					
-			pPositions += 4;													// Move our pionter down by 4 so we are pointing to {... vPos.y, vPos.x, 0, 0}
-			reg1 = _mm_set1_epi32(0);											// Clear reg1 to 0, (vPos.x < 0) ? vPos.x * -1 : 0 <- this zero
-			_comp = _mm_cmpgt_epi32(reg1, reg2);								//(vPos.x < 0)?,  (vPos.y < 0)?
-			reg5 = _mm_abs_epi32(reg2);											// vPos.x * -1, vPos.y * -1. Abs will resturn positive absolute numbers, we do not need to muliply
-			_mm_maskstore_epi32(pPositions, _comp, reg5);						// We only change the values of nXStart & nYStart if _comp is set (nXStart = (vPos.x < 0) ? vPos.x * -1)
-			
-																				// Now lets get the nXPos, nYPso
-
-			reg2 = _mm_set_epi32(0, 0, vPos.x, vPos.y);							// Tottle the reg2 so that 0's will cause nXStart & nYStart results not to be affected
-			_comp = _mm_cmpgt_epi32(reg1, reg2);								// (vPos.x < 0)?,  (vPos.y < 0)? . We reuse reg1 as it is already set to 0's
-			_mm_maskstore_epi32(pPositions, _comp, reg1);						// Ee only change the values of nXPos & nYPos if _comp is set (vPos.x < 0) ? 0 : vPos.x;
-			
 			// Create ints to represent the vector positions
 			// makes life easier for debugging and creation of the for loop for SIMD
+			// std::vector<int> vecPositions = { vPos.y, vPos.x, nHeight, nWidth, nYPos, nXPos, nYStart, nXStart };
 			int nHeight = vecPositions[2];
 			int nWidth = vecPositions[3];
 			int nYPos = vecPositions[4];
 			int nXPos = vecPositions[5];
 			int nYStart = vecPositions[6];
 			int nXStart = vecPositions[7];
-
-
-			/*---- END Non-SIMD Vs SIMD ---*/
 
 			// Get the target layer vector pointer
 			int nVecTarget = (nYPos * pdrawTarget->width) + nXPos;
@@ -3998,36 +3992,17 @@ namespace X11
 
 		}
 
-		olc::Sprite* Sprite::Duplicate_AVX512(const olc::vi2d& vPos, olc::Sprite* pdrawTarget)
+		olc::Sprite* Sprite::Duplicate_AVX512(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions)
 		{
-			// Ok we need to ensure the sprite can fit on the layer (pdrawTarget)
-			// lets add the with of the sprite to pos.x 
-			int nFullWidth = vPos.x + width;
-			int nFullHeight = vPos.y + height;
-			int nWidth = width; //std::min(nFullWidth, pdrawTarget->width);
-			int nHeight = height; // std::min(nFullHeight, pdrawTarget->height);
-
-			if (nFullWidth >= pdrawTarget->width)
-			{
-				// Get the new width for off layer sprite
-				nWidth = nFullWidth - pdrawTarget->width;
-				nWidth = width - nWidth;
-			}
-
-			if (nFullHeight >= pdrawTarget->height)
-			{
-				// get the new height for off layer sprite
-				nHeight = nFullHeight - pdrawTarget->height;
-				nHeight = height - nHeight;
-			}
-
-			// Get the new Start Position for off layer sprite
-			int nXStart = (vPos.x < 0) ? vPos.x * -1 : 0;
-			int nYStart = (vPos.y < 0) ? vPos.y * -1 : 0;
-
-			// Get the new vPosition for off layer sprite
-			int nXPos = (vPos.x < 0) ? 0 : vPos.x;
-			int nYPos = (vPos.y < 0) ? 0 : vPos.y;
+			// Create ints to represent the vector positions
+			// makes life easier for debugging and creation of the for loop for SIMD
+			// std::vector<int> vecPositions = { vPos.y, vPos.x, nHeight, nWidth, nYPos, nXPos, nYStart, nXStart };
+			int nHeight = vecPositions[2];
+			int nWidth = vecPositions[3];
+			int nYPos = vecPositions[4];
+			int nXPos = vecPositions[5];
+			int nYStart = vecPositions[6];
+			int nXStart = vecPositions[7];
 
 			// Get the target layer vector pointer
 			int nVecTarget = (nYPos * pdrawTarget->width) + nXPos;
@@ -4109,11 +4084,6 @@ namespace X11
 
 				}
 			}
-
-
-
-
-
 
 			return pdrawTarget;
 
