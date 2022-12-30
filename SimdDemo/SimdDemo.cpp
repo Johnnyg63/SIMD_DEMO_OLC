@@ -154,18 +154,20 @@ public:
 		/*------- Level Merge Sprites 7 ------*/
 		nLayerDrawMergeSprite = CreateLayer();
 		SetDrawTarget(nLayerDrawMergeSprite);
-		olc::vi2d vPos = { 50, 50 };
-		olc::vi2d vSize = { 100, 100 };
-		
+			
 		Clear_SIMD(olc::BLANK);
-	
+		sprFace1->setStoreSubSprites(false);
+		sprBody3D->setStoreSubSprites(false);
+
+		
+		
 		EnableLayer(nLayerDrawMergeSprite, true);
 
 		/*------- Level Merge Sprites 7 ------*/
 		nLayerBackGround = CreateLayer();
 		SetDrawTarget(nLayerBackGround);
 		Clear_SIMD(olc::WHITE);
-		DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
+		//DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
 		EnableLayer(nLayerBackGround, true);
 
 
@@ -214,8 +216,12 @@ public:
 		// merge!!
 		SetDrawTarget(nLayerDrawMergeSprite);
 		Clear_SIMD(olc::BLANK);
-		// We need to merge the face1 into the Body3D
-		// coming soon!
+		sprFace1->setStoreSubSprites(false);
+		sprBody3D->setStoreSubSprites(false);
+
+		sprMrSmiley = sprFace1->Duplicate_SIMD({ 15,35 }, sprBody3D, olc::BLANK);
+
+		DrawSprite_SIMD({ 800, 400 }, sprMrSmiley);
 
 		if (GetKey(olc::Key::E).bPressed)
 		{
