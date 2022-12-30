@@ -133,11 +133,11 @@ public:
 		nLayerDrawSprite = CreateLayer();
 		SetDrawTarget(nLayerDrawSprite);
 		Clear_SIMD(olc::BLANK);
-		DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
+	/*	DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
 		DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
 		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
 		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
-		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
+		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);*/
 		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
 		EnableLayer(nLayerDrawSprite, true);
 
@@ -145,9 +145,9 @@ public:
 		nLayerDrawPartialSprite = CreateLayer();
 		SetDrawTarget(nLayerDrawPartialSprite);
 		Clear_SIMD(olc::BLANK);
-		DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
+		/*DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
 		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::HORIZ);
-		DrawPartialSprite_SIMD({ 300, 350 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::VERT);
+		DrawPartialSprite_SIMD({ 300, 350 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::VERT);*/
 		
 		EnableLayer(nLayerDrawPartialSprite, true);
 
@@ -165,7 +165,7 @@ public:
 		nLayerBackGround = CreateLayer();
 		SetDrawTarget(nLayerBackGround);
 		Clear_SIMD(olc::WHITE);
-		DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
+		//DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
 		EnableLayer(nLayerBackGround, true);
 
 
@@ -200,7 +200,7 @@ public:
 		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
 		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
 		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
-		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);
+		DrawSprite_SIMD(1250, 500, sprMrIcey, 1, olc::Sprite::VERT);
 
 		//
 		SetDrawTarget(nLayerDrawPartialSprite);

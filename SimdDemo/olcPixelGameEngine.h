@@ -3816,34 +3816,95 @@ namespace X11
 		olc::Sprite* Sprite::Duplicate_AVX256(const olc::vi2d& vPos, olc::Sprite* pdrawTarget)
 		{
 
+			/*---- Non-SIMD Vs SIMD*/
+
+			/*
+				There is no real performance gain using either of the executions (Non-SIMD, SIMD)
+				Always remember it is near impossible to beat the complier. You might ask then why write it in SIMD at all? 
+				Well, when you are developing low level code, it is difficult to jump between languages. 
+				Most developers prefer to stay with one language within a method. 
+				As these methods are SIMD executions, then write it all in SIMD, therefore there is no surprises later when another developer 
+				needs to debug. 
+				They are expecting SIMD, and they get SIMD
+				Finally the SIMD code below should be a tiny bit faster, but it would be impossible to measure
+
+				Non SIMD Code:
+
+				// Ok we need to ensure the sprite can fit on the layer (pdrawTarget)
+				// Work out if the sprite is out of bounds and crop the sprite to fit into the bounds
+
+				int nFullWidth = vPos.x + width;
+				int nFullHeight = vPos.y + height;
+				int nWidth = width; //std::min(nFullWidth, pdrawTarget->width);
+				int nHeight = height; // std::min(nFullHeight, pdrawTarget->height);
+			
+				if (nFullWidth >= pdrawTarget->width)
+				{
+					// Get the new width for off layer sprite
+					nWidth = nFullWidth - pdrawTarget->width;
+					nWidth = width - nWidth;
+				}
+
+				if (nFullHeight >= pdrawTarget->height)
+				{
+					// Get the new height for off layer sprite
+					nHeight = nFullHeight - pdrawTarget->height;
+					nHeight = height - nHeight;
+				}
+
+				// Get the new Start Position for off layer sprite
+				int nXStart = (vPos.x < 0) ? vPos.x * -1 : 0;
+				int nYStart = (vPos.y < 0) ? vPos.y * -1 : 0;
+
+				// Get the new vPosition for off layer sprite
+				int nXPos = (vPos.x < 0) ? 0 : vPos.x;
+				int nYPos = (vPos.y < 0) ? 0 : vPos.y;
+
+			*/
+
 			// Ok we need to ensure the sprite can fit on the layer (pdrawTarget)
-			// lets add the with of the sprite to pos.x 
-			int nFullWidth = vPos.x + width;
-			int nFullHeight = vPos.y + height;
-			int nWidth = width; //std::min(nFullWidth, pdrawTarget->width);
-			int nHeight = height; // std::min(nFullHeight, pdrawTarget->height);
+			// Work out if the sprite is out of bounds and crop the sprite to fit into the bounds
 
-			if (nFullWidth >= pdrawTarget->width)
-			{
-				// Get the new width for off layer sprite
-				nWidth = nFullWidth - pdrawTarget->width;
-				nWidth = width - nWidth;
-			}
+			std::vector<int> vecPositions = { vPos.y, vPos.x, height, width, vPos.y, vPos.x, 0, 0};
+			int* pPositions = vecPositions.data();
 
-			if (nFullHeight >= pdrawTarget->height)
-			{
-				// get the new height for off layer sprite
-				nHeight = nFullHeight - pdrawTarget->height;
-				nHeight = height - nHeight;
-			}
+			__m128i reg1, reg2, reg3, reg4, reg5, _comp;
 
-			// Get the new Start Position for off layer sprite
-			int nXStart = (vPos.x < 0) ? vPos.x * -1 : 0;
-			int nYStart = (vPos.y < 0) ? vPos.y * -1 : 0;
+			reg1 = _mm_set_epi32(width, height,0 , 0);							// Holds width and height
+			reg2 = _mm_set_epi32(vPos.x, vPos.y, 0, 0);							// Holds vPos.x and vPos.y
+			reg3 = _mm_add_epi32(reg1, reg2);									// nFullWidth = vPos.x + width, nFullHeight = vPos.y + height;
+			reg4 = _mm_set_epi32(pdrawTarget->width, pdrawTarget->height, 0, 0);// Holds pdrawTarget->width, pdrawTarget->height
+			_comp = _mm_cmpgt_epi32(reg3, reg4);								// if (nFullWidth >= pdrawTarget->width) (true false)
+			reg5 = _mm_sub_epi32(reg3, reg4);									// nWidth = nFullWidth - pdrawTarget->width, nheight = nheight - pdrawTarget->height,
+			reg5 = _mm_sub_epi32(reg1, reg5);									// nWidth = width - nWidth, nHeight = height - nHeight;
+			_mm_maskstore_epi32(pPositions, _comp, reg5);						// We only store the computed values of reg5, if _comp is set. i.e. nFullWidth is greater than pdrawTarget->width 
 
-			// Get the new vPosition for off layer sprite
-			int nXPos = (vPos.x < 0) ? 0 : vPos.x;
-			int nYPos = (vPos.y < 0) ? 0 : vPos.y;
+																				// Now lets get the nXStart, nYStart 
+			
+																				// Note the vector is read in backwards, (right to left) <---    <---    <--- 					
+			pPositions += 4;													// Move our pionter down by 4 so we are pointing to {... vPos.y, vPos.x, 0, 0}
+			reg1 = _mm_set1_epi32(0);											// Clear reg1 to 0, (vPos.x < 0) ? vPos.x * -1 : 0 <- this zero
+			_comp = _mm_cmpgt_epi32(reg1, reg2);								//(vPos.x < 0)?,  (vPos.y < 0)?
+			reg5 = _mm_abs_epi32(reg2);											// vPos.x * -1, vPos.y * -1. Abs will resturn positive absolute numbers, we do not need to muliply
+			_mm_maskstore_epi32(pPositions, _comp, reg5);						// We only change the values of nXStart & nYStart if _comp is set (nXStart = (vPos.x < 0) ? vPos.x * -1)
+			
+																				// Now lets get the nXPos, nYPso
+
+			reg2 = _mm_set_epi32(0, 0, vPos.x, vPos.y);							// Tottle the reg2 so that 0's will cause nXStart & nYStart results not to be affected
+			_comp = _mm_cmpgt_epi32(reg1, reg2);								// (vPos.x < 0)?,  (vPos.y < 0)? . We reuse reg1 as it is already set to 0's
+			_mm_maskstore_epi32(pPositions, _comp, reg1);						// Ee only change the values of nXPos & nYPos if _comp is set (vPos.x < 0) ? 0 : vPos.x;
+			
+			// Create ints to represent the vector positions
+			// makes life easier for debugging and creation of the for loop for SIMD
+			int nHeight = vecPositions[2];
+			int nWidth = vecPositions[3];
+			int nYPos = vecPositions[4];
+			int nXPos = vecPositions[5];
+			int nYStart = vecPositions[6];
+			int nXStart = vecPositions[7];
+
+
+			/*---- END Non-SIMD Vs SIMD ---*/
 
 			// Get the target layer vector pointer
 			int nVecTarget = (nYPos * pdrawTarget->width) + nXPos;
@@ -3918,8 +3979,7 @@ namespace X11
 
 					for (int x = nXStart; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
 					{
-						// See Notes: TBA
-						// is source sprite is not a mulpile of 8 (i.e. 16, 24, 32 etc) we will be left with extra pixels that may be overwriten
+						// if source sprite is not a mulpile of 8 (i.e. 16, 24, 32 etc) we will be left with extra pixels that may be overwriten
 						// the _sx, _ex ensure this does not happen
 						_sx = _mm256_set_epi32(x + 7, x + 6, x + 5, x + 4, x + 3, x + 2, x + 1, x);
 						_vecRead = _mm256_load_ps((const float*)((olc::Pixel*)pColData.data() + nVecRead));
