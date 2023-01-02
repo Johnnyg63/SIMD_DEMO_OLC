@@ -4663,7 +4663,7 @@ namespace X11
 						_sx = _mm512_set_1to16_epi32(x);
 						_vecRead = _mm512_loadu_epi32((const __m512i*)((olc::Pixel*)pColData.data() + nVecRead));
 						_vecTargetRead = _mm512_loadu_epi32((const __m512i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecRead));
-						_vecOutput = _mm512_mask_blend_epi8(_mm512_cmpeq_epi32_mask(_vecRead, _blendpixel), _vecRead, _vecTargetRead);
+						_vecOutPut = _mm512_mask_blend_epi8(_mm512_cmpeq_epi32_mask(_vecRead, _blendpixel), _vecRead, _vecTargetRead);
 						_mm512_mask_store_epi32(pTargetVector, _mm512_cmpgt_epi32_mask(_ex, _sx), _vecRead);
 					}
 
