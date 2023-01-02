@@ -4315,7 +4315,7 @@ namespace X11
 			case SIMD_AVX:
 			case SIMD_AVX2:
 				return Duplicate_AVX256(vPos, pTargetSprite, vecPositions, p);
-				/*return Duplicate_SSE(vPos, pTargetSprite, vecPositions, p);*/
+				
 				break;
 
 			case SIMD_SSE:
@@ -4352,13 +4352,13 @@ namespace X11
 
 			// Get the target layer vector pointer
 			int nVecTarget = (nYPos * pTargetSprite->width) + nXPos;
-			float* pTargetVector = (float*)pTargetSprite->pColData.data();
+			int* pTargetVector = (int*)pTargetSprite->pColData.data();
 			size_t nVecTLen = pTargetSprite->pColData.size();
 			int nTargetY = 0;
 
 			// Get the local sprite vector detals
 			size_t nVecRead = 0; // Start position of read vector
-			float* pSoureVector = (float*)pColData.size();
+			int* pSoureVector = (int*)pColData.size();
 			size_t nVecRLen = pColData.size();
 
 			// Set up counters
@@ -4372,9 +4372,9 @@ namespace X11
 			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
 			__m128i _sx, _ex, _compare;
-			__m128  _comparePixel, _vecRead, _blendpixel, _vecTargetRead, _vecOutPut;
+			__m128i  _comparePixel, _vecRead, _blendpixel, _vecTargetRead, _vecOutPut;
 
-			_blendpixel = _mm_set_ps(p.n, p.n, p.n, p.n);
+			_blendpixel = _mm_set_epi32(p.n, p.n, p.n, p.n);
 
 			_sx = _mm_set_epi32(0, 0, 0, 0);
 			_ex = _mm_set_epi32(ex, ex, ex, ex);
@@ -4396,12 +4396,15 @@ namespace X11
 					nVecRead = (y * width) + nXStart;
 					for (int x = nXStart; x < ex; x += 4, pTargetVector += 4, nVecRead += 4, nVecTarget += 4)
 					{
-						_vecRead = _mm_loadu_ps((const float*)((olc::Pixel*)pColData.data() + nVecRead));
-						_vecTargetRead = _mm_loadu_ps((const float*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecTarget));
-						_comparePixel = _mm_cmpeq_ps(_vecRead, _blendpixel);
 
-						_vecOutPut = _mm_blendv_ps(_vecRead, _vecTargetRead, _comparePixel);
-						_mm_storeu_ps(pTargetVector, _vecOutPut);
+						// as there is no offset we can read and write as fast as possible
+						_vecRead = _mm_loadu_epi32((const __m128i*)((olc::Pixel*)pColData.data() + nVecRead));
+						_vecTargetRead = _mm_loadu_epi32((const __m128i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecTarget));
+						_comparePixel = _mm_cmpeq_epi32(_vecRead, _blendpixel);
+
+						_vecOutPut = _mm_blendv_epi8(_vecRead, _vecTargetRead, _comparePixel);
+
+						_mm_storeu_epi32(pTargetVector, _vecOutPut);
 
 					}
 
@@ -4429,15 +4432,15 @@ namespace X11
 					for (int x = nXStart; x < ex; x += 4, pTargetVector += 4, nVecRead += 4, nVecTarget += 4)
 					{
 						_sx = _mm_set_epi32(x + 3, x + 2, x + 1, x);
-						_vecRead = _mm_load_ps((const float*)((olc::Pixel*)pColData.data() + nVecRead));
-						_vecTargetRead = _mm_load_ps((const float*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecTarget));
 						
-						_comparePixel = _mm_cmpeq_ps(_vecRead, _blendpixel);
+						_vecRead = _mm_loadu_epi32((const __m128i*)((olc::Pixel*)pColData.data() + nVecRead));
+						_vecTargetRead = _mm_loadu_epi32((const __m128i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecTarget));
+						_comparePixel = _mm_cmpeq_epi32(_vecRead, _blendpixel);
 
-						_vecRead = _mm_blendv_ps(_vecRead, _vecTargetRead, _comparePixel);
+						_vecOutPut = _mm_blendv_epi8(_vecRead, _vecTargetRead, _comparePixel);
 
 						_compare = _mm_cmpgt_epi32(_ex, _sx);
-						_mm_maskstore_ps(pTargetVector, _compare, _vecRead);
+						_mm_maskstore_epi32(pTargetVector, _compare, _vecOutPut);
 
 					}
 
@@ -4513,13 +4516,13 @@ namespace X11
 					for (int x = nXStart; x < ex; x += 8, pTargetVector += 8, nVecRead += 8, nVecTarget += 8)
 					{
 						// as there is no offset we can read and write as fast as possible
-						_vecRead = _mm256_loadu_epi16((const __m256i*)((olc::Pixel*)pColData.data() + nVecRead));
-						_vecTargetRead = _mm256_loadu_epi16((const __m256i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecTarget));
-						_comparePixel =  _mm256_cmpeq_epi16(_vecRead, _blendpixel);
+						_vecRead = _mm256_loadu_epi32((const __m256i*)((olc::Pixel*)pColData.data() + nVecRead));
+						_vecTargetRead = _mm256_loadu_epi32((const __m256i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecTarget));
+						_comparePixel =  _mm256_cmpeq_epi32(_vecRead , _blendpixel);
 						
 						_vecOutPut = _mm256_blendv_epi8(_vecRead, _vecTargetRead, _comparePixel);
 
-						_mm256_storeu_epi16(pTargetVector, _vecOutPut);
+						_mm256_storeu_epi32(pTargetVector, _vecOutPut);
 
 
 					}
@@ -4546,11 +4549,13 @@ namespace X11
 						// if source sprite is not a mulpile of 8 (i.e. 16, 24, 32 etc) we will be left with extra pixels that may be overwriten
 						// the _sx, _ex ensure this does not happen
 						_sx = _mm256_set_epi32(x + 7, x + 6, x + 5, x + 4, x + 3, x + 2, x + 1, x);
-						_vecRead = _mm256_loadu_si256((const __m256i*)((olc::Pixel*)pColData.data() + nVecRead));
-						_vecTargetRead = _mm256_loadu_si256((const __m256i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecRead));
+
+						_vecRead = _mm256_loadu_epi32((const __m256i*)((olc::Pixel*)pColData.data() + nVecRead));
+						_vecTargetRead = _mm256_loadu_epi32((const __m256i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecTarget));
 						_comparePixel = _mm256_cmpeq_epi32(_vecRead, _blendpixel);
 
 						_vecOutPut = _mm256_blendv_epi8(_vecRead, _vecTargetRead, _comparePixel);
+
 						_compare = _mm256_cmpgt_epi32(_ex, _sx);
 						_mm256_maskstore_epi32(pTargetVector, _compare, _vecOutPut);
 					}
@@ -4598,7 +4603,7 @@ namespace X11
 			int nOffSet = nWidth % 16;
 			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
-			__m512i  _sx, _ex, _vecRead, _blendpixel, _comparePixel, _vecTargetRead;
+			__m512i  _sx, _ex, _vecRead, _blendpixel, _comparePixel, _vecTargetRead, _vecOutPut;
 
 
 			_blendpixel = _mm512_set1_epi32(p.n);
@@ -4625,12 +4630,15 @@ namespace X11
 					nVecRead = (y * width) + nXStart;
 					for (int x = nXStart; x < ex; x += 16, pTargetVector += 16, nVecRead += 16, nVecTarget += 16)
 					{
-						_vecRead = _mm512_load_si512((const __m512i*)((olc::Pixel*)pColData.data() + nVecRead));
-						_vecTargetRead = _mm512_load_si512((const __m512i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecRead));
 
-						_vecRead = _mm512_mask_blend_epi32(_mm512_cmpeq_epi32_mask(_vecRead, _blendpixel), _vecRead, _vecTargetRead);
+						// as there is no offset we can read and write as fast as possible
+						
+						_vecRead = _mm512_loadu_epi32((const __m512i*)((olc::Pixel*)pColData.data() + nVecRead));
+						_vecTargetRead = _mm512_loadu_epi32((const __m512i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecRead));
 
-						_mm512_storeu_epi32(pTargetVector, _vecRead);
+						_vecOutPut = _mm512_mask_blend_epi8(_mm512_cmpeq_epi32_mask(_vecRead, _blendpixel), _vecRead, _vecTargetRead);
+
+						_mm512_storeu_epi32(pTargetVector, _vecOutPut);
 					}
 
 					pTargetVector -= nVecTarget; // reset the pointer to 0 position
@@ -4653,9 +4661,9 @@ namespace X11
 					for (int x = nXStart; x < ex; x += 16, pTargetVector += 16, nVecRead += 16, nVecTarget += 16)
 					{
 						_sx = _mm512_set_1to16_epi32(x);
-						_vecRead = _mm512_load_si512((const __m512i*)((olc::Pixel*)pColData.data() + nVecRead));
-						_vecTargetRead = _mm512_load_si512((const __m512i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecRead));
-						_vecRead = _mm512_mask_blend_epi32(_mm512_cmpeq_epi32_mask(_vecRead, _blendpixel), _vecRead, _vecTargetRead);
+						_vecRead = _mm512_loadu_epi32((const __m512i*)((olc::Pixel*)pColData.data() + nVecRead));
+						_vecTargetRead = _mm512_loadu_epi32((const __m512i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecRead));
+						_vecOutput = _mm512_mask_blend_epi8(_mm512_cmpeq_epi32_mask(_vecRead, _blendpixel), _vecRead, _vecTargetRead);
 						_mm512_mask_store_epi32(pTargetVector, _mm512_cmpgt_epi32_mask(_ex, _sx), _vecRead);
 					}
 
