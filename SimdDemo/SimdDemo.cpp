@@ -24,6 +24,9 @@ public:
 	int nMapHeight = 0; // Map Height 
 	olc::Sprite::SIMD_INSTRUCTON_OPTION nCurrentSIMDOption;
 
+	int nFlipFaceCount = 0;
+	bool bTottleFace = false;
+
 	/* End Vars */
 
 	/* Sprites */
@@ -51,6 +54,8 @@ public:
 
 
 	/* End Layers */
+
+
 
 
 
@@ -156,18 +161,14 @@ public:
 		SetDrawTarget(nLayerDrawMergeSprite);
 			
 		Clear_SIMD(olc::BLANK);
-		sprFace1->setStoreSubSprites(false);
-		sprBody3D->setStoreSubSprites(false);
-
-		
-		
+				
 		EnableLayer(nLayerDrawMergeSprite, true);
 
 		/*------- Level Merge Sprites 7 ------*/
 		nLayerBackGround = CreateLayer();
 		SetDrawTarget(nLayerBackGround);
 		Clear_SIMD(olc::WHITE);
-		//DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
+		DrawSprite_SIMD({ 0,0 }, sprBackGround, 2, olc::Sprite::NONE);
 		EnableLayer(nLayerBackGround, true);
 
 
@@ -216,12 +217,25 @@ public:
 		// merge!!
 		SetDrawTarget(nLayerDrawMergeSprite);
 		Clear_SIMD(olc::BLANK);
-		sprFace1->setStoreSubSprites(false);
-		sprBody3D->setStoreSubSprites(false);
+		
 
-		sprMrSmiley = sprFace1->Duplicate_SIMD({ 15,35 }, sprBody3D, olc::BLANK);
+		if (bTottleFace)
+		{
+			DrawMergeSprite_SIMD({ 800, 400 }, sprFace1, { 10, 40 }, sprBody3D);
+			DrawMergeSprite_SIMD({ 1000, 400 }, sprFace1, { 10, 40 }, sprBody3D, olc::BLANK, 2, olc::Sprite::VERT);
+		}
+		else
+		{
+			DrawMergeSprite_SIMD({ 800, 400 }, sprFace2, { 10, 40 }, sprBody3D);
+			DrawMergeSprite_SIMD({ 1000, 400 }, sprFace2, { 10, 40 }, sprBody3D, olc::BLANK, 2, olc::Sprite::VERT);
+		}
+		nFlipFaceCount++;
+		if (nFlipFaceCount > 200)
+		{
+			bTottleFace = !bTottleFace;
+			nFlipFaceCount = 0;
+		}
 
-		DrawSprite_SIMD({ 800, 400 }, sprMrSmiley);
 
 		if (GetKey(olc::Key::E).bPressed)
 		{
@@ -229,12 +243,17 @@ public:
 			{
 				sprMrIcey->setStoreSubSprites(false);
 				sprBackGround->setStoreSubSprites(false);
-				
+				sprFace1->setStoreSubSprites(false);
+				sprFace2->setStoreSubSprites(false);
+				sprBody3D->setStoreSubSprites(false);
 			}
 			else
 			{
 				sprMrIcey->setStoreSubSprites(true);
 				sprBackGround->setStoreSubSprites(true);
+				sprFace1->setStoreSubSprites(true);
+				sprFace2->setStoreSubSprites(true);
+				sprBody3D->setStoreSubSprites(true);
 				
 			}
 		}
@@ -245,6 +264,9 @@ public:
 			{
 				sprMrIcey->setInsturctionSet(nCurrentSIMDOption);
 				sprBackGround->setInsturctionSet(nCurrentSIMDOption);
+				sprFace1->setInsturctionSet(nCurrentSIMDOption);
+				sprFace2->setInsturctionSet(nCurrentSIMDOption);
+				sprBody3D->setInsturctionSet(nCurrentSIMDOption);
 				
 			}
 			else
@@ -252,6 +274,10 @@ public:
 
 				sprMrIcey->setInsturctionSet(sprMrIcey->SIMD_NONE);
 				sprBackGround->setInsturctionSet(sprMrIcey->SIMD_NONE);
+				sprFace1->setInsturctionSet(sprMrIcey->SIMD_NONE);
+				sprFace2->setInsturctionSet(sprMrIcey->SIMD_NONE);
+				sprBody3D->setInsturctionSet(sprMrIcey->SIMD_NONE);
+
 				
 			}
 		}
