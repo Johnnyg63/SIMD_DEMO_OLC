@@ -69,8 +69,9 @@ public:
 		sprMrIcey = new olc::Sprite("./assets/images/runsmall.png");
 		sprMrIcey->setInsturctionSet(sprMrIcey->getInsturctionSet());
 		sprMrIcey->setInsturctionSet(olc::Sprite::SIMD_AVX);
-		sprMrIcey->setStoreSubSprites(true);
 		sprMrIceyVERT = sprMrIcey->Duplicate_SIMD(olc::Sprite::VERT);
+		sprMrIcey->setStoreSubSprites(true);
+		
 		nCurrentSIMDOption = sprMrIcey->getInsturctionSet();
 
 		sprMrSmiley = new olc::Sprite("./assets/images/CubeEnemuHaHaHa.png");
