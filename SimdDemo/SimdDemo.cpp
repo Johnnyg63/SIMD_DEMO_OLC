@@ -31,8 +31,10 @@ public:
 
 	/* Sprites */
 	olc::Sprite* sprMrIcey = nullptr;
+	olc::Sprite* sprMrIceyVERT = nullptr;
 	olc::Sprite* sprMrSmiley = nullptr;
 	olc::Sprite* sprSpriteSheet = nullptr;
+	olc::Sprite* sprSpriteSheetVERT = nullptr;
 	olc::Sprite* sprBody3D = nullptr;
 	olc::Sprite* sprFace1 = nullptr;
 	olc::Sprite* sprFace2 = nullptr;
@@ -68,6 +70,7 @@ public:
 		sprMrIcey->setInsturctionSet(sprMrIcey->getInsturctionSet());
 		sprMrIcey->setInsturctionSet(olc::Sprite::SIMD_AVX);
 		sprMrIcey->setStoreSubSprites(true);
+		sprMrIceyVERT = sprMrIcey->Duplicate_SIMD(olc::Sprite::VERT);
 		nCurrentSIMDOption = sprMrIcey->getInsturctionSet();
 
 		sprMrSmiley = new olc::Sprite("./assets/images/CubeEnemuHaHaHa.png");
@@ -76,7 +79,15 @@ public:
 
 		sprSpriteSheet = new olc::Sprite("./assets/images/SpriteSheet.png");
 		sprSpriteSheet->setInsturctionSet(sprSpriteSheet->getInsturctionSet());
+		sprSpriteSheetVERT = sprSpriteSheet->Duplicate_SIMD({ 250, 0 }, { 100,150 });
+		sprSpriteSheetVERT = sprSpriteSheetVERT->Duplicate_SIMD(olc::Sprite::VERT);
 		sprSpriteSheet->setStoreSubSprites(true);
+		sprSpriteSheetVERT->setStoreSubSprites(true);
+		
+
+
+		//DrawPartialSprite_SIMD({ 1000, 120 }, sprSpriteSheet, { 250, 0 }, { 100,150 }, 1, olc::Sprite::VERT);
+
 
 		sprBody3D = new olc::Sprite("./assets/images/Body3D.png");
 		sprBody3D->setInsturctionSet(sprBody3D->getInsturctionSet());
@@ -138,21 +149,13 @@ public:
 		nLayerDrawSprite = CreateLayer();
 		SetDrawTarget(nLayerDrawSprite);
 		Clear_SIMD(olc::BLANK);
-	/*	DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
-		DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
-		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
-		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
-		DrawSprite_SIMD(100, 350, sprMrIcey, 1, olc::Sprite::VERT);*/
-		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
 		EnableLayer(nLayerDrawSprite, true);
 
 		/*------- Level Partial Sprites 6 ------*/
 		nLayerDrawPartialSprite = CreateLayer();
 		SetDrawTarget(nLayerDrawPartialSprite);
 		Clear_SIMD(olc::BLANK);
-		/*DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
-		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::HORIZ);
-		DrawPartialSprite_SIMD({ 300, 350 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::VERT);*/
+		
 		
 		EnableLayer(nLayerDrawPartialSprite, true);
 
@@ -198,21 +201,13 @@ public:
 		SetDrawTarget(nLayerDrawSprite);
 		Clear_SIMD(olc::BLANK);
 
-		DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
-		DrawSprite_SIMD({ 400, 50 }, sprMrIcey, 2, olc::Sprite::NONE);
-		DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
-		DrawSprite_SIMD({ 400, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
-		//DrawSprite_SIMD({ 800, 50 }, sprMrSmiley, 3, olc::Sprite::HORIZ);
-		DrawSprite_SIMD(1250, 500, sprMrIcey, 1, olc::Sprite::VERT);
-
+		
 		//
 		SetDrawTarget(nLayerDrawPartialSprite);
 		Clear_SIMD(olc::BLANK);
 		DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
 		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 2, olc::Sprite::HORIZ);
-		DrawPartialSprite_SIMD({ 700, 100 }, sprSpriteSheet, { 0, 0 }, { 150,150 }, 1, olc::Sprite::NONE);
-		DrawPartialSprite_SIMD({ 850, 100 }, sprSpriteSheet, { 150, 0 }, { 100,150 }, 1, olc::Sprite::HORIZ);
-		DrawPartialSprite_SIMD({ 950, 120 }, sprSpriteSheet, { 250, 0 }, { 100,150 }, 1, olc::Sprite::VERT);
+		
 
 		// merge!!
 		SetDrawTarget(nLayerDrawMergeSprite);
@@ -223,11 +218,29 @@ public:
 		{
 			DrawMergeSprite_SIMD({ 800, 400 }, sprFace1, { 10, 40 }, sprBody3D);
 			DrawMergeSprite_SIMD({ 1000, 400 }, sprFace1, { 10, 40 }, sprBody3D, olc::BLANK, 2, olc::Sprite::VERT);
+			DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
+			DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::HORIZ);
+			DrawSprite_SIMD(100, 350, sprMrIceyVERT, 1, olc::Sprite::NONE);
+			DrawSprite_SIMD({ 500, 50 }, sprMrIcey, 2, olc::Sprite::NONE);		
+			DrawSprite_SIMD({ 500, 400 }, sprMrIcey, 2, olc::Sprite::HORIZ);
+			DrawPartialSprite_SIMD({ 750, 100 }, sprSpriteSheet, { 0, 0 }, { 150,150 }, 1, olc::Sprite::NONE);
+			DrawPartialSprite_SIMD({ 900, 100 }, sprSpriteSheet, { 150, 0 }, { 100,150 }, 1, olc::Sprite::HORIZ);
+			DrawPartialSprite_SIMD({ 1000, 120 }, sprSpriteSheet, { 250, 0 }, { 100,150 }, 1, olc::Sprite::VERT);
+			
 		}
 		else
 		{
 			DrawMergeSprite_SIMD({ 800, 400 }, sprFace2, { 10, 40 }, sprBody3D);
 			DrawMergeSprite_SIMD({ 1000, 400 }, sprFace2, { 10, 40 }, sprBody3D, olc::BLANK, 2, olc::Sprite::VERT);
+			DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::HORIZ);
+			DrawSprite_SIMD(100, 200, sprMrIcey, 1, olc::Sprite::NONE);
+			DrawSprite_SIMD(100, 350, sprMrIceyVERT, 1, olc::Sprite::HORIZ);
+			DrawSprite_SIMD({ 500, 50 }, sprMrIcey, 2, olc::Sprite::HORIZ);
+			DrawSprite_SIMD({ 500, 400 }, sprMrIcey, 2, olc::Sprite::NONE);
+			DrawPartialSprite_SIMD({ 750, 100 }, sprSpriteSheet, { 0, 0 }, { 150,150 }, 1, olc::Sprite::HORIZ);
+			DrawPartialSprite_SIMD({ 900, 100 }, sprSpriteSheet, { 150, 0 }, { 100,150 }, 1, olc::Sprite::NONE);
+			DrawSprite_SIMD({ 1000, 120 }, sprSpriteSheetVERT, 1, olc::Sprite::HORIZ);
+						
 		}
 		nFlipFaceCount++;
 		if (nFlipFaceCount > 200)
