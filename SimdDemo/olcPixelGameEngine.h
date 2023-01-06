@@ -960,7 +960,7 @@ namespace olc
 
 				vecSubSprites.clear();
 				vecSubSprites.shrink_to_fit();
-				
+
 			}
 			bStoreSubSprite = bStore;
 
@@ -1126,7 +1126,7 @@ namespace olc
 		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vStartPos, const olc::vi2d& vSize);
 
-		
+
 		/// <summary>
 		/// Draws the passed sprite to a draw target at the position set
 		/// This method is usually called from the Sprite Class with 'Store Sub Sprites' is enabled
@@ -1155,7 +1155,7 @@ namespace olc
 		/// <returns>A pointer to the draw target (Auto memory Managed)</returns>
 		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip);
 
-		
+
 		/// <summary>
 		/// Creates a duplicate partial scaled/flipped sprite using the Start Position and Size
 		/// </summary>
@@ -1184,8 +1184,8 @@ namespace olc
 		/// <param name="vStartPos">Partial Sprite Start position, (Default {0,0})</param>
 		/// <param name="scale">Scaler value (>= 1) (Default 1)</param>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT; (default NONE)</param>
-		void StoreSubSprite(olc::Sprite* pSubSprite, olc::vi2d vStartPos = {0, 0}, uint32_t scale = 1, 
-								olc::Sprite::Flip flip = olc::Sprite::NONE, olc::Sprite* pDrawTarget = nullptr);
+		void StoreSubSprite(olc::Sprite* pSubSprite, olc::vi2d vStartPos = { 0, 0 }, uint32_t scale = 1,
+			olc::Sprite::Flip flip = olc::Sprite::NONE, olc::Sprite* pDrawTarget = nullptr);
 
 
 		/// <summary>
@@ -1212,9 +1212,9 @@ namespace olc
 		/// <param name="pMergeFromSprite">Used solely for merging of sprites (Default nullptr)</param>
 		/// <returns>A pointer to a sprite, nullptr if not exist</returns>
 		olc::Sprite* GetStoredSubSprite(olc::vi2d vStartPos, olc::vi2d vSize, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE,
-											olc::Sprite* pDrawTarget = nullptr);
+			olc::Sprite* pDrawTarget = nullptr);
 
-		
+
 
 	private:
 
@@ -1923,9 +1923,9 @@ namespace olc
 		/// <param name="blendPixel">Blend Pixel for merge (Default olc::BLANK)</param>
 		/// <param name="scale">Scaler size (>= 1, Default 1)</param>
 		/// <param name="flip">olc::Sprite::NONE, ..HORIZ, ..VERT (Default NONE)</param>
-		void DrawMergeSprite_SIMD(const olc::vi2d& vPos, Sprite* pFromSprite, const olc::vi2d& vToSpritePos, Sprite* pToSprite, 
-									Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
-		
+		void DrawMergeSprite_SIMD(const olc::vi2d& vPos, Sprite* pFromSprite, const olc::vi2d& vToSpritePos, Sprite* pToSprite,
+			Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+
 		/// <summary>
 		/// Merges the pFromSprite Into the pToSprite and draws it to the Draw Target at position (vPosx, vPosy)
 		/// </summary>
@@ -1938,9 +1938,37 @@ namespace olc
 		/// <param name="blendPixel">Blend Pixel for merge (Default olc::BLANK)</param>
 		/// <param name="scale">Scaler size (>= 1, Default 1)</param>
 		/// <param name="flip">olc::Sprite::NONE, ..HORIZ, ..VERT (Default NONE</param>
-		void DrawMergeSprite_SIMD(int32_t vPosx, int32_t vPosy, Sprite* pFromSprite, int32_t vToSpritePosx, int32_t vToSpritePosy, 
-								Sprite* pToSprite, Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+		void DrawMergeSprite(int32_t vPosx, int32_t vPosy, Sprite* pFromSprite, int32_t vToSpritePosx, int32_t vToSpritePosy,
+			Sprite* pToSprite, Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
 
+
+		/// <summary>
+		/// Merges the pFromSprite Into the pToSprite and draws it to the Draw Target at position (vPos.x, vPos.y)
+		/// </summary>
+		/// <param name="pos">Target positon (x,y)</param>
+		/// <param name="pFromSprite">a pointer to the From Sprite</param>
+		/// <param name="vToSpritePos">Position within the ToSprite to Draw the From Sprite</param>
+		/// <param name="pToSprite">A pointer to the Sprite to which the from Sprite will be merged into</param>
+		/// <param name="blendPixel">Blend Pixel for merge (Default olc::BLANK)</param>
+		/// <param name="scale">Scaler size (>= 1, Default 1)</param>
+		/// <param name="flip">olc::Sprite::NONE, ..HORIZ, ..VERT (Default NONE)</param>
+		void DrawMergeSprite(const olc::vi2d& vPos, Sprite* pFromSprite, const olc::vi2d& vToSpritePos, Sprite* pToSprite,
+			Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+
+		/// <summary>
+		/// Merges the pFromSprite Into the pToSprite and draws it to the Draw Target at position (vPosx, vPosy)
+		/// </summary>
+		/// <param name="vPosx">Target positon x</param>
+		/// <param name="vPosy">Target positon y</param>
+		/// <param name="pFromSprite">a pointer to the From Sprite</param>
+		/// <param name="vToSpritePosx">Position x within the ToSprite to Draw the From Sprite</param>
+		/// <param name="vToSpritePosy">Position y within the ToSprite to Draw the From Sprite</param>
+		/// <param name="pToSprite">A pointer to the Sprite to which the from Sprite will be merged into</param>
+		/// <param name="blendPixel">Blend Pixel for merge (Default olc::BLANK)</param>
+		/// <param name="scale">Scaler size (>= 1, Default 1)</param>
+		/// <param name="flip">olc::Sprite::NONE, ..HORIZ, ..VERT (Default NONE</param>
+		void DrawMergeSprite_SIMD(int32_t vPosx, int32_t vPosy, Sprite* pFromSprite, int32_t vToSpritePosx, int32_t vToSpritePosy,
+			Sprite* pToSprite, Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
 
 	private: // SIMD Instuctions John Galvin
 
@@ -2634,7 +2662,7 @@ namespace X11
 				{
 					StoreSubSprite(spr, vStartPos, scale, flip);
 				}
-				
+
 				return spr;
 			}
 
@@ -2802,7 +2830,7 @@ namespace X11
 				nVecRead = nVecRLen;
 				for (int y = 1; y < height; y++)
 				{
-					nVecRead = (y * width) -8;
+					nVecRead = (y * width) - 8;
 					for (int x = 0; x < ex; x += 8, pTargetVector += 8, nVecRead += -8, nVecTarget += 8)
 					{
 						_vecRead = _mm256_load_ps((const float*)((olc::Pixel*)pColData.data() + nVecRead));
@@ -2972,7 +3000,7 @@ namespace X11
 			{
 				spr = GetStoredSubSprite(vStartPos, vSize, scale);
 				if (spr != nullptr) return spr;
-				
+
 			}
 
 			if (scale <= 1)
@@ -2980,11 +3008,11 @@ namespace X11
 				// Return a copy of the sprite
 				spr = this->Duplicate();
 				spr->setInsturctionSet(getInsturctionSet());
-				
+
 				if (bStoreSubSprite)
 				{
 					StoreSubSprite(spr, vStartPos, scale);
-					
+
 				}
 				return spr;
 			}
@@ -3023,7 +3051,7 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(width * scale, height * scale);
 			spr->setInsturctionSet(getInsturctionSet());
-			
+
 			int ex = width;
 
 			int nVecTarget = 0;										// Target vector position
@@ -3197,7 +3225,7 @@ namespace X11
 			_reverse = _mm256_set_epi32(nsuffle[7], nsuffle[6], nsuffle[5], nsuffle[4], nsuffle[3], nsuffle[2], nsuffle[1], nsuffle[0]);
 			nPosCounter = 0;
 
-			int y = 0; int x = 0;int yS = 0;
+			int y = 0; int x = 0; int yS = 0;
 			size_t nTottle = scale;
 
 			for (y = 0; y < height; y++, yS++)
@@ -3276,7 +3304,7 @@ namespace X11
 		{
 			olc::Sprite* spr = new olc::Sprite(width * scale, height * scale);
 			spr->setInsturctionSet(getInsturctionSet());
-			
+
 			int ex = width;
 
 			int nVecTarget = 0; // Target vector position
@@ -3401,7 +3429,7 @@ namespace X11
 		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vStartPos, const olc::vi2d& vSize)
 		{
 
-			
+
 			// Lets check if the sprite all ready exist?
 			if (bStoreSubSprite)
 			{
@@ -3495,7 +3523,7 @@ namespace X11
 						// Load in the read vector
 						_vecRead = _mm_load_si128((const __m128i*)((olc::Pixel*)pColData.data() + nVecRead));
 						_mm_storeu_epi32(pTargetVector, _vecRead);
-						
+
 					}
 
 
@@ -3574,7 +3602,7 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(vSize.x, vSize.y);
 			spr->setInsturctionSet(getInsturctionSet());
-			
+
 			int sx = 0;
 			int ex = vSize.x;
 			int nOffSet = ex % 8;
@@ -3661,7 +3689,7 @@ namespace X11
 
 						// Store only the pixels that are between sx-->ex
 						_mm256_maskstore_epi32(pTargetVector, _result, _vecRead);
-						
+
 					}
 
 					// shift the ptr for pTargetVector by the offset
@@ -3675,7 +3703,7 @@ namespace X11
 
 			}
 
-		
+
 
 			//Clean up any left over pixels
 			_vecRead = _mm256_set1_epi32(0);
@@ -3705,7 +3733,7 @@ namespace X11
 
 			olc::Sprite* spr = new olc::Sprite(vSize.x, vSize.y);
 			spr->setInsturctionSet(getInsturctionSet());
-			
+
 			int sx = 0;
 			int ex = vSize.x;
 			int nOffSet = ex % 16;
@@ -3917,7 +3945,7 @@ namespace X11
 			_mm_maskstore_epi32(pPositions, _compare, _reg1);						// We only change the values of nXPos & nYPos if _comp is set (vPos.x < 0) ? 0 : vPos.x;
 
 			//Final Result => std::vector<int> vecPositions = { vPos.y, vPos.x, nHeight, nWidth, nYPos, nXPos, nYStart, nXStart };
-			
+
 			/*---- END Non-SIMD Vs SIMD ---*/
 
 			switch (getInsturctionSet())
@@ -4252,7 +4280,7 @@ namespace X11
 
 		olc::Sprite* Sprite::DuplicateMerge_SIMD(const olc::vi2d& vPos, olc::Sprite* pTargetSprite, olc::Pixel p)
 		{
-			
+
 			// We work with the pTargetDupSprite
 
 			if (getInsturctionSet() == SIMD_NONE) return pTargetSprite;
@@ -4359,7 +4387,7 @@ namespace X11
 			case SIMD_AVX:
 			case SIMD_AVX2:
 				pMergeSprite = DuplicateMerge_AVX256(vPos, pTargetSprite->Duplicate_SIMD(), vecPositions, p);
-				
+
 				break;
 
 			case SIMD_SSE:
@@ -4379,7 +4407,7 @@ namespace X11
 
 			if (bStoreSubSprite)
 			{
-					StoreSubSprite(pMergeSprite, vPos, 1, olc::Sprite::NONE, pTargetSprite);
+				StoreSubSprite(pMergeSprite, vPos, 1, olc::Sprite::NONE, pTargetSprite);
 			}
 
 
@@ -4479,7 +4507,7 @@ namespace X11
 					for (int x = nXStart; x < ex; x += 4, pTargetVector += 4, nVecRead += 4, nVecTarget += 4)
 					{
 						_sx = _mm_set_epi32(x + 3, x + 2, x + 1, x);
-						
+
 						_vecRead = _mm_loadu_epi32((const __m128i*)((olc::Pixel*)pColData.data() + nVecRead));
 						_vecTargetRead = _mm_loadu_epi32((const __m128i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecTarget));
 						_comparePixel = _mm_cmpeq_epi32(_vecRead, _blendpixel);
@@ -4565,8 +4593,8 @@ namespace X11
 						// as there is no offset we can read and write as fast as possible
 						_vecRead = _mm256_loadu_epi32((const __m256i*)((olc::Pixel*)pColData.data() + nVecRead));
 						_vecTargetRead = _mm256_loadu_epi32((const __m256i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecTarget));
-						_comparePixel =  _mm256_cmpeq_epi32(_vecRead , _blendpixel);
-						
+						_comparePixel = _mm256_cmpeq_epi32(_vecRead, _blendpixel);
+
 						_vecOutPut = _mm256_blendv_epi8(_vecRead, _vecTargetRead, _comparePixel);
 
 						_mm256_storeu_epi32(pTargetVector, _vecOutPut);
@@ -4678,7 +4706,7 @@ namespace X11
 					{
 
 						// as there is no offset we can read and write as fast as possible
-						
+
 						_vecRead = _mm512_loadu_epi32((const __m512i*)((olc::Pixel*)pColData.data() + nVecRead));
 						_vecTargetRead = _mm512_loadu_epi32((const __m512i*)((olc::Pixel*)pTargetSprite->pColData.data() + nVecRead));
 
@@ -4737,7 +4765,7 @@ namespace X11
 			// Lets check if the sprite all ready exist?
 			if (bStoreSubSprite)
 			{
-				
+
 				olc::vi2d vScaleSize = { this->width * (int)scale, this->height * (int)scale };
 				olc::Sprite* spr = GetStoredSubSprite(vStartPos, vScaleSize, scale, (olc::Sprite::Flip)flip);
 				if (spr != nullptr)
@@ -4758,7 +4786,7 @@ namespace X11
 			{
 				olc::vi2d vSize = { sprFlipped->width, sprFlipped->height };
 				StoreSubSprite(sprFlipped, vStartPos, scale, (olc::Sprite::Flip)flip);
-				
+
 			}
 			else
 			{
@@ -4854,10 +4882,10 @@ namespace X11
 				delete sprScaled;
 				delete sprFlipped;
 				delete sprPartial;
-				
+
 			}
 
-			
+
 			return pdrawTarget;
 
 		}
@@ -4927,8 +4955,8 @@ namespace X11
 
 		}
 
-		void Sprite::StoreSubSprite(olc::Sprite* pSubSprite, olc::vi2d vStartPos, 
-									uint32_t scale, olc::Sprite::Flip flip, olc::Sprite* pDrawTarget)
+		void Sprite::StoreSubSprite(olc::Sprite* pSubSprite, olc::vi2d vStartPos,
+			uint32_t scale, olc::Sprite::Flip flip, olc::Sprite* pDrawTarget)
 		{
 			// Pre-checks
 			if (pSubSprite == nullptr) return;
@@ -6094,13 +6122,13 @@ namespace X11
 
 		}
 
-		void PixelGameEngine::DrawMergeSprite_SIMD(const olc::vi2d& vPos, Sprite* pFromSprite, const olc::vi2d& vToSpritePos, Sprite* pToSprite, 
-													Pixel blendPixel, uint32_t scale, olc::Sprite::Flip flip)
+		void PixelGameEngine::DrawMergeSprite_SIMD(const olc::vi2d& vPos, Sprite* pFromSprite, const olc::vi2d& vToSpritePos, Sprite* pToSprite,
+			Pixel blendPixel, uint32_t scale, olc::Sprite::Flip flip)
 		{
 			DrawMergeSprite_SIMD(vPos.x, vPos.y, pFromSprite, vToSpritePos.x, vToSpritePos.y, pToSprite, blendPixel, scale, flip);
 		}
-		void PixelGameEngine::DrawMergeSprite_SIMD(int32_t vPosx, int32_t vPosy, Sprite* pFromSprite, int32_t vToSpritePosx, int32_t vToSpritePosy, 
-													Sprite* pToSprite, Pixel blendPixel, uint32_t scale, olc::Sprite::Flip flip)
+		void PixelGameEngine::DrawMergeSprite_SIMD(int32_t vPosx, int32_t vPosy, Sprite* pFromSprite, int32_t vToSpritePosx, int32_t vToSpritePosy,
+			Sprite* pToSprite, Pixel blendPixel, uint32_t scale, olc::Sprite::Flip flip)
 		{
 			if (pFromSprite == nullptr) return;
 
@@ -6113,9 +6141,8 @@ namespace X11
 			case Sprite::SIMD_NONE:
 			case Sprite::RISC_ARM:
 			case Sprite::RISC_NEON:
-				// Use unrolling (default code)
-				//DrawSprite(x, y, sprite, scale, flip); 
-				// TODO: John Galvin
+				DrawMergeSprite(vPosx, vPosy, pFromSprite, vToSpritePosx, vToSpritePosy,
+									pToSprite, blendPixel, scale, flip);
 				return;
 				break;
 
@@ -6123,18 +6150,18 @@ namespace X11
 				break;
 			}
 
-			olc::vi2d vPos = { vPosx , vPosy};
+			olc::vi2d vPos = { vPosx , vPosy };
 			olc::vi2d vSize = { pToSprite->width ,  pToSprite->height };
 
-			olc::vi2d vToSpritePos = {vToSpritePosx ,vToSpritePosy};
-			
+			olc::vi2d vToSpritePos = { vToSpritePosx ,vToSpritePosy };
+
 			olc::Sprite* pMergeSprite = nullptr;
 
 			// Lets check if it already exist
 			if (pFromSprite->getStoreSubSprites())
 			{
 				pMergeSprite = pFromSprite->GetStoredSubSprite(vToSpritePos, vSize, scale, flip, pToSprite);
-				
+
 			}
 
 			if (pMergeSprite == nullptr)
@@ -6143,7 +6170,7 @@ namespace X11
 				pMergeSprite = pFromSprite->DuplicateMerge_SIMD(vToSpritePos, pToSprite, blendPixel);
 
 			}
-			
+
 
 			if (scale > 1)
 			{
@@ -6166,7 +6193,7 @@ namespace X11
 				delete pMergeSprite;
 			}
 
-			
+
 
 		}
 
@@ -7003,6 +7030,62 @@ namespace X11
 				}
 			}
 		}
+
+
+		void PixelGameEngine::DrawMergeSprite(const olc::vi2d& vPos, Sprite* pFromSprite, const olc::vi2d& vToSpritePos, Sprite* pToSprite,
+			Pixel blendPixel, uint32_t scale, olc::Sprite::Flip flip)
+		{
+			DrawMergeSprite(vPos.x, vPos.y, pFromSprite, vToSpritePos.x, vToSpritePos.y, pToSprite, blendPixel, scale, flip);
+		}
+		void PixelGameEngine::DrawMergeSprite(int32_t vPosx, int32_t vPosy, Sprite* pFromSprite, int32_t vToSpritePosx, int32_t vToSpritePosy,
+			Sprite* pToSprite, Pixel blendPixel, uint32_t scale, olc::Sprite::Flip flip)
+		{
+			if (pFromSprite == nullptr) return;
+
+			if (pToSprite == nullptr) return;
+
+			olc::Sprite* pHoldDrawTarget = pDrawTarget;
+			olc::Sprite* pMergeSprite = pToSprite->Duplicate();
+			olc::Pixel writePixel = blendPixel;
+			olc::Pixel readPixel = blendPixel;
+
+
+
+			SetDrawTarget(pMergeSprite);
+
+			int32_t fxs = 0, fxm = 1, fx = 0;
+			int32_t fys = 0, fym = 1, fy = 0;
+
+
+
+			fx = fxs;
+			for (int32_t i = 0; i < pFromSprite->width; i++, fx += fxm)
+			{
+				fy = fys;
+				for (int32_t j = 0; j < pFromSprite->height; j++, fy += fym)
+				{
+					writePixel = pFromSprite->GetPixel(fx, fy);
+					if (writePixel != blendPixel)
+					{
+						pMergeSprite->SetPixel(fx + vToSpritePosx, fy + vToSpritePosy, writePixel);
+
+					}
+
+				}
+
+
+			}
+
+			SetDrawTarget(pHoldDrawTarget);
+
+			DrawSprite(vPosx, vPosy, pMergeSprite, scale, flip);
+
+			delete pMergeSprite;
+
+
+		}
+
+
 
 		void PixelGameEngine::SetDecalMode(const olc::DecalMode& mode)
 		{

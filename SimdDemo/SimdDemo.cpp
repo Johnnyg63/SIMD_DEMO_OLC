@@ -206,17 +206,20 @@ public:
 		//
 		SetDrawTarget(nLayerDrawPartialSprite);
 		Clear_SIMD(olc::BLANK);
-		DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
-		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 2, olc::Sprite::HORIZ);
+		/*DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
+		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 2, olc::Sprite::HORIZ);*/
 		
 
 		// merge!!
 		SetDrawTarget(nLayerDrawMergeSprite);
 		Clear_SIMD(olc::BLANK);
-		
 
 		if (bTottleFace)
 		{
+			/*DrawMergeSprite({ 100, 500 }, sprFace1, { 10, 40 }, sprBody3D, olc::BLANK, 1, olc::Sprite::NONE);
+			DrawMergeSprite_SIMD({ 300, 500 }, sprFace1, { 10, 40 }, sprBody3D, olc::BLANK, 1, olc::Sprite::NONE);*/
+
+
 			DrawMergeSprite_SIMD({ 800, 400 }, sprFace1, { 10, 40 }, sprBody3D);
 			DrawMergeSprite_SIMD({ 1000, 400 }, sprFace1, { 10, 40 }, sprBody3D, olc::BLANK, 2, olc::Sprite::VERT);
 			DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::NONE);
@@ -231,6 +234,9 @@ public:
 		}
 		else
 		{
+			/*DrawMergeSprite({ 100, 500 }, sprFace2, { 10, 40 }, sprBody3D, olc::BLANK, 1, olc::Sprite::NONE);
+			DrawMergeSprite_SIMD({ 300, 500 }, sprFace2, { 10, 40 }, sprBody3D, olc::BLANK, 1, olc::Sprite::NONE);*/
+
 			DrawMergeSprite_SIMD({ 800, 400 }, sprFace2, { 10, 40 }, sprBody3D);
 			DrawMergeSprite_SIMD({ 1000, 400 }, sprFace2, { 10, 40 }, sprBody3D, olc::BLANK, 2, olc::Sprite::VERT);
 			DrawSprite_SIMD({ 100, 50 }, sprMrIcey, 1, olc::Sprite::HORIZ);
