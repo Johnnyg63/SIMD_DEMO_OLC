@@ -3,7 +3,7 @@
 	olcPixelGameEngine.h
 
 	+-------------------------------------------------------------+
-	|           OneLoneCoder Pixel Game Engine v2.22              |
+	|           OneLoneCoder Pixel Game Engine v2.23              |
 	|  "What do you need? Pixels... Lots of Pixels..." - javidx9  |
 	+-------------------------------------------------------------+
 
@@ -29,7 +29,7 @@
 	License (OLC-3)
 	~~~~~~~~~~~~~~~
 
-	Copyright 2018 - 2022 OneLoneCoder.com
+	Copyright 2018 - 2023 OneLoneCoder.com
 
 	Redistribution and use in source and binary forms, with or without modification,
 	are permitted provided that the following conditions are met:
@@ -197,7 +197,7 @@
 
 	Author
 	~~~~~~
-	David Barr, aka javidx9, �OneLoneCoder 2018, 2019, 2020, 2021, 2022
+	David Barr, aka javidx9, (c) OneLoneCoder 2018, 2019, 2020, 2021, 2022
 */
 #pragma endregion
 
@@ -315,7 +315,8 @@
 		  +FillTexturedTriangle() - Software rasterizes a textured, coloured, triangle
 		  +FillTexturedPolygon() - Hijacks DecalStructure for configuration
 		  +olc::vf2d arguments for Sprite::Sample() functions
-	2.22: Add SIMD Instruction methods for PGE and Sprite, Add comments for all SIMD Instruction Sets (John Galvin)
+	2.22: = Fix typo on dragged file buffers for unicode builds
+	2.23: Add SIMD Instruction methods for PGE and Sprite, Add comments for all SIMD Instruction Sets (John Galvin)
 		  + #include <intrin.h>
 		  Public: Class Sprite
 		  + Updated ~Sprite to clear any stored vector sprites
@@ -328,12 +329,16 @@
 		  + Inline: bool CheckForAVX512Support()
 		  + Inline: bool CheckForARMSupport() Placeholder not implemented yet
 		  + olc::Sprite* Duplicate(olc::Sprite::Flip flip);
+		  + olc::Sprite* Duplicate(uint32_t scale);
+		  + olc::Sprite* DuplicateMerge(const olc::vi2d& vTargetPos, olc::Sprite* pTargetSprite, olc::Pixel p = olc::BLANK);
 		  + olc::Sprite* Duplicate_SIMD();
 		  + olc::Sprite* Duplicate_SIMD(olc::Sprite::Flip flip);
+		  + olc::Sprite* Duplicate_SIMD(uint32_t scale); // John Galvin
 		  + olc::Sprite* Duplicate_SIMD(const olc::vi2d& vPos, const olc::vi2d& vSize);
-		  + olc::Sprite* Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget);
-		  + olc::Sprite* Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint8_t flip);
-		  + olc::Sprite* Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip);
+		  + olc::Sprite* DrawToTarget_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget);
+		  + olc::Sprite* DrawToTarget_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint8_t flip);
+		  + olc::Sprite* DrawToTarget_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip);
+		  + olc::Sprite* DuplicateMerge_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pTargetSprite, olc::Pixel p = olc::BLANK);
 		  + std::vector<std::tuple<olc::vi2d, olc::vi2d, uint32_t, uint8_t, Sprite*>> vecSubSprites;
 
 
@@ -341,6 +346,9 @@
 		  + olc::Sprite* Duplicate_SSE(olc::Sprite::Flip flip)
 		  + olc::Sprite* Duplicate_AVX256(olc::Sprite::Flip flip)
 		  + olc::Sprite* Duplicate_AVX512(olc::Sprite::Flip flip)
+		   + olc::Sprite* Duplicate_SSE(uint32_t scale)
+		  + olc::Sprite* Duplicate_AVX256(uint32_t scale)
+		  + olc::Sprite* Duplicate_AVX512(uint32_t scale)
 		  + olc::Sprite* Duplicate_SSE(const olc::vi2d& vPos, const olc::vi2d& vSize)
 		  + olc::Sprite* Duplicate_AVX256(const olc::vi2d& vPos, const olc::vi2d& vSize)
 		  + olc::Sprite* Duplicate_AVX512(const olc::vi2d& vPos, const olc::vi2d& vSize)
@@ -353,6 +361,9 @@
 		  + olc::Sprite* Duplicate_SSE(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip)
 		  + olc::Sprite* Duplicate_AVX256(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip)
 		  + olc::Sprite* Duplicate_AVX512(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip)
+		  + olc::Sprite* DuplicateMerge_SSE(const olc::vi2d& vTargetPos, olc::Sprite* pTargetSprite, std::vector<int> vecPositions, olc::Pixel p)
+		  + olc::Sprite* DuplicateMerge_AVX256(const olc::vi2d& vTargetPos, olc::Sprite* pTargetSprite, std::vector<int> vecPositions, olc::Pixel p)
+		  + olc::Sprite* DuplicateMerge_AVX512(const olc::vi2d& vTargetPos, olc::Sprite* pTargetSprite, std::vector<int> vecPositions, olc::Pixel p)
 
 		  Public: Class PixelGameEngine
 		  + Inline enum: enum INSTRUCTON_OPTION
@@ -372,7 +383,11 @@
 		  + void DrawSprite_SIMD(int32_t x, int32_t y, Sprite* sprite, uint32_t scale = 1, uint8_t flip = olc::Sprite::NONE)
 		  + void DrawPartialSprite_SIMD(const olc::vi2d& pos, Sprite* sprite, const olc::vi2d& sourcepos, const olc::vi2d& size, uint32_t scale = 1, uint8_t flip = olc::Sprite::NONE)
 		  + void DrawPartialSprite_SIMD(int32_t x, int32_t y, Sprite* sprite, int32_t ox, int32_t oy, int32_t w, int32_t h, uint32_t scale = 1, uint8_t flip = olc::Sprite::NONE)
-		  + void DrawPartialTriangleDecal(olc::Decal* decal, const olc::vf2d& pos1, const olc::vf2d& pos2, const olc::vf2d& pos3, const olc::Pixel& tint)
+		  + void DrawMergeSprite_SIMD(const olc::vi2d& vPos, Sprite* pFromSprite, const olc::vi2d& vToSpritePos, Sprite* pToSprite, Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+		  + void DrawMergeSprite_SIMD(int32_t vPosx, int32_t vPosy, Sprite* pFromSprite, int32_t vToSpritePosx, int32_t vToSpritePosy, Sprite* pToSprite, Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+		  + void DrawMergeSprite(int32_t vPosx, int32_t vPosy, Sprite* pFromSprite, int32_t vToSpritePosx, int32_t vToSpritePosy, Sprite* pToSprite, Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+		  + void DrawMergeSprite(const olc::vi2d& vPos, Sprite* pFromSprite, const olc::vi2d& vToSpritePos, Sprite* pToSprite, Pixel blendPixel = olc::BLANK, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+
 
 		  Private: Class PixelGameEngine
 		  + void Clear_SSE(int VecStartIndex, int VecEndIndex, Pixel p = olc::BLANK)
@@ -383,12 +398,6 @@
 		  + void DrawFillLine_AVX256(int sx, int ex, int ny, Pixel p = olc::WHITE)
 		  + void DrawFillLine_AVX512(int sx, int ex, int ny, Pixel p = olc::WHITE)
 		  + void DrawFillLine_SIMD(int VecStartIndex, int VecEndIndex, int ny, Pixel p = olc::WHITE)
-
-
-
-
-
-
 
 	!! Apple Platforms will not see these updates immediately - Sorry, I dont have a mac to test... !!
 	!!   Volunteers willing to help appreciated, though PRs are manually integrated with credit     !!
@@ -469,7 +478,7 @@ int main()
 #include <intrin.h> // John Galvin
 #pragma endregion
 
-#define PGE_VER 221
+#define PGE_VER 223
 
 // O------------------------------------------------------------------------------O
 // | COMPILER CONFIGURATION ODDITIES                                              |
@@ -904,9 +913,14 @@ namespace olc
 		Pixel* GetData();
 		olc::Sprite* Duplicate();
 		olc::Sprite* Duplicate(const olc::vi2d& vPos, const olc::vi2d& vSize);
-		olc::Sprite* Duplicate(olc::Sprite::Flip flip); 
+
+		/*-------------- New Methods John Galvin --------------*/
+
+		olc::Sprite* Duplicate(olc::Sprite::Flip flip);
 		olc::Sprite* Duplicate(uint32_t scale);
-		olc::Sprite* DuplicateMerge(const olc::vi2d& vPos, Sprite* pIntoSprite, Pixel blendPixel = olc::BLANK);
+		olc::Sprite* DuplicateMerge(const olc::vi2d& vTargetPos, olc::Sprite* pTargetSprite, olc::Pixel p = olc::BLANK);
+
+		/*-------------- END New Methods John Galvin --------------*/
 		olc::vi2d Size() const;
 		std::vector<olc::Pixel> pColData;
 		Mode modeSample = Mode::NORMAL;
@@ -1016,7 +1030,6 @@ namespace olc
 
 			return SIMD_INSTRUCTON_OPTION(nInsturctionSet);
 		}
-
 
 		/// <summary>
 		/// Sets SIMD Instruction Set SSE4 if supported (128bit)
@@ -1213,8 +1226,6 @@ namespace olc
 		olc::Sprite* GetStoredSubSprite(olc::vi2d vStartPos, olc::vi2d vSize, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE,
 			olc::Sprite* pDrawTarget = nullptr);
 
-
-
 	private:
 
 		/// <summary>
@@ -1372,6 +1383,7 @@ namespace olc
 		olc::Sprite* DuplicateMerge_AVX512(const olc::vi2d& vTargetPos, olc::Sprite* pTargetSprite, std::vector<int> vecPositions, olc::Pixel p);
 
 		/*-------------------------- END SIMD INSTRUCTIONS CHANGES --------------------------------------------------------*/
+
 
 
 	};
@@ -1721,8 +1733,10 @@ namespace olc
 		int32_t TextEntryGetCursor() const;
 		bool IsTextEntryEnabled() const;
 
-
-	public: // SIMD Instruction Methods John Galvin
+		/// <summary>
+	/// SIMD Instruction Methods John Galvin
+	/// </summary>
+	public:
 
 		/// <summary>
 		/// PGE SIMD Instruction Set (Default -1)
@@ -2601,13 +2615,19 @@ namespace X11
 			return spr;
 		}
 
+		olc::vi2d olc::Sprite::Size() const
+		{
+			return { width, height };
+		}
+
+
 		/*--------------------------- New Methods John Galvin -------------------------------------*/
 
-		/// <summary>
-		/// Creates a duplicate Sprite that is flipped
-		/// </summary>
-		/// <param name="flip">olc::Sprite::NONE...HOZIR...VERT</param>
-		/// <returns>A pointer to a new sprite</returns>
+	/// <summary>
+	/// Creates a duplicate Sprite that is flipped
+	/// </summary>
+	/// <param name="flip">olc::Sprite::NONE...HOZIR...VERT</param>
+	/// <returns>A pointer to a new sprite</returns>
 		olc::Sprite* Sprite::Duplicate(olc::Sprite::Flip flip)
 		{
 			// Update John Galvin
@@ -2639,7 +2659,7 @@ namespace X11
 		{
 			// Update John Galvin
 			scale = (scale < 1) ? 1 : scale;
-			olc::Sprite* spr = new olc::Sprite(width* scale, height * scale);
+			olc::Sprite* spr = new olc::Sprite(width * scale, height * scale);
 
 			int32_t fxs = 0, fxm = 1, fx = 0;
 			int32_t fys = 0, fym = 1, fy = 0;
@@ -2665,12 +2685,11 @@ namespace X11
 		/// <param name="pIntoSprite">A pointer to the sprite to be merged into</param>
 		/// <param name="blendPixel">Blend Pixel (Default olc::Pixel::BLANK)</param>
 		/// <returns>A pointer to a new merge sprite</returns>
-		olc::Sprite* Sprite::DuplicateMerge(const olc::vi2d& vPos, Sprite* pIntoSprite, Pixel blendPixel)
+		olc::Sprite* Sprite::DuplicateMerge(const olc::vi2d& vTargetPos, olc::Sprite* pTargetSprite, olc::Pixel p)
 		{
-			// Update John Galvin
-			if (pIntoSprite == nullptr) return nullptr;
-			olc::Sprite* pMergeSprite = pIntoSprite->Duplicate();
-			olc::Pixel writePixel = blendPixel;
+			if (pTargetSprite == nullptr) return nullptr;
+			olc::Sprite* pMergeSprite = pTargetSprite->Duplicate();
+			olc::Pixel writePixel = p;
 
 			int32_t fxs = 0, fxm = 1, fx = 0;
 			int32_t fys = 0, fym = 1, fy = 0;
@@ -2683,14 +2702,13 @@ namespace X11
 				for (int32_t j = 0; j < height; j++, fy += fym)
 				{
 					writePixel = GetPixel(fx, fy);
-					if (writePixel != blendPixel)
+					if (writePixel != p)
 					{
-						pMergeSprite->SetPixel(fx + vPos.x, fy + vPos.y, writePixel);
+						pMergeSprite->SetPixel(fx + vTargetPos.x, fy + vTargetPos.y, writePixel);
 
 					}
 
 				}
-
 
 			}
 
@@ -5055,10 +5073,8 @@ namespace X11
 		/*--------------------------- END SIMD Instruction set John Galvin-------------------------------------*/
 
 
-		olc::vi2d olc::Sprite::Size() const
-		{
-			return { width, height };
-		}
+
+
 
 		// O------------------------------------------------------------------------------O
 		// | olc::Decal IMPLEMENTATION                                                    |
@@ -5315,12 +5331,12 @@ namespace X11
 
 
 		// O------------------------------------------------------------------------------O
-		// | olc::PixelGameEngine SSE, AVX, AVX512 IMPLEMENTATION John Galvin                                         |
-		// O------------------------------------------------------------------------------O
+			// | olc::PixelGameEngine SSE, AVX, AVX512 IMPLEMENTATION John Galvin                                         |
+			// O------------------------------------------------------------------------------O
 
-		/// <summary>
-		/// Sets SIMD Instruction Set SSE4 if supported (128bit)
-		/// </summary>
+			/// <summary>
+			/// Sets SIMD Instruction Set SSE4 if supported (128bit)
+			/// </summary>
 		bool PixelGameEngine::CheckForSSESupport()
 		{
 			bool bSupported = false;
@@ -5383,7 +5399,6 @@ namespace X11
 		}
 
 
-
 		// O------------------------------------------------------------------------------O
 		// | olc::PixelGameEngine IMPLEMENTATION                                          |
 		// O------------------------------------------------------------------------------O
@@ -5395,7 +5410,6 @@ namespace X11
 			// Bring in relevant Platform & Rendering systems depending
 			// on compiler parameters
 			olc_ConfigureSystem();
-
 
 			// Check for SIMD CPU support John Galvin
 			INSTRUCTION_SET = INSTRUCTON_OPTION::NONE;
@@ -6207,7 +6221,7 @@ namespace X11
 			case Sprite::RISC_ARM:
 			case Sprite::RISC_NEON:
 				DrawMergeSprite(vPosx, vPosy, pFromSprite, vToSpritePosx, vToSpritePosy,
-									pToSprite, blendPixel, scale, flip);
+					pToSprite, blendPixel, scale, flip);
 				return;
 				break;
 
@@ -6261,8 +6275,6 @@ namespace X11
 
 
 		}
-
-
 
 		void PixelGameEngine::DrawFillLine_SIMD(int VecStartIndex, int VecEndIndex, int ny, Pixel p)
 		{
@@ -6425,14 +6437,12 @@ namespace X11
 				_sx = _mm512_set_epi32(i + 15, i + 14, i + 13, i + 12, i + 11, i + 10, i + 9, i + 8, i + 7, i + 6, i + 5, i + 4, i + 3, i + 2, i + 1, i);
 
 				_mm512_mask_store_epi32(pTargetVector, _mm512_cmpge_epi32_mask(_ex, _sx), _setpixel);
-
-
 			}
-
 
 		}
 
 		/*--------------------------- END SIMD Instruction Set-------------------------------------*/
+
 
 		void PixelGameEngine::DrawLine(const olc::vi2d& pos1, const olc::vi2d& pos2, Pixel p, uint32_t pattern)
 		{
@@ -7096,7 +7106,6 @@ namespace X11
 			}
 		}
 
-
 		void PixelGameEngine::DrawMergeSprite(const olc::vi2d& vPos, Sprite* pFromSprite, const olc::vi2d& vToSpritePos, Sprite* pToSprite,
 			Pixel blendPixel, uint32_t scale, olc::Sprite::Flip flip)
 		{
@@ -7109,51 +7118,17 @@ namespace X11
 
 			if (pToSprite == nullptr) return;
 
-			//olc::Sprite* pHoldDrawTarget = pDrawTarget;
-			//olc::Sprite* pMergeSprite = pToSprite->Duplicate();
-			//olc::Pixel writePixel = blendPixel;
-			//olc::Pixel readPixel = blendPixel;
-
 			olc::Sprite* pMergeSprite = nullptr;
 			olc::vi2d vToSpritePos = { vToSpritePosx, vToSpritePosy };
 
 			pMergeSprite = pFromSprite->DuplicateMerge(vToSpritePos, pToSprite, blendPixel);
 
-
-			/*SetDrawTarget(pMergeSprite);
-
-			int32_t fxs = 0, fxm = 1, fx = 0;
-			int32_t fys = 0, fym = 1, fy = 0;
-
-
-
-			fx = fxs;
-			for (int32_t i = 0; i < pFromSprite->width; i++, fx += fxm)
-			{
-				fy = fys;
-				for (int32_t j = 0; j < pFromSprite->height; j++, fy += fym)
-				{
-					writePixel = pFromSprite->GetPixel(fx, fy);
-					if (writePixel != blendPixel)
-					{
-						pMergeSprite->SetPixel(fx + vToSpritePosx, fy + vToSpritePosy, writePixel);
-
-					}
-
-				}
-
-
-			}
-
-			SetDrawTarget(pHoldDrawTarget);*/
 			if (pMergeSprite != nullptr)
 			{
 				DrawSprite(vPosx, vPosy, pMergeSprite, scale, flip);
 
 				delete pMergeSprite;
 			}
-			
-
 
 		}
 
@@ -9979,7 +9954,7 @@ namespace X11
 						vFiles.push_back(std::string(buffer));
 						delete[] buffer;
 #else
-						vFiles.push_back(std::string(dbuffer));
+						vFiles.push_back(std::string(dfbuffer));
 #endif
 					}
 
