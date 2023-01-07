@@ -87,9 +87,6 @@ public:
 		
 
 
-		//DrawPartialSprite_SIMD({ 1000, 120 }, sprSpriteSheet, { 250, 0 }, { 100,150 }, 1, olc::Sprite::VERT);
-
-
 		sprBody3D = new olc::Sprite("./assets/images/Body3D.png");
 		sprBody3D->setInsturctionSet(sprBody3D->getInsturctionSet());
 		sprBody3D->setStoreSubSprites(true);
