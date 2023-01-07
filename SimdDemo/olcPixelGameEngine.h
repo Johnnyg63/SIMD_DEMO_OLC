@@ -904,7 +904,9 @@ namespace olc
 		Pixel* GetData();
 		olc::Sprite* Duplicate();
 		olc::Sprite* Duplicate(const olc::vi2d& vPos, const olc::vi2d& vSize);
-		olc::Sprite* Duplicate(olc::Sprite::Flip flip); // Creates a duplicate flipped sprite John Galvin
+		olc::Sprite* Duplicate(olc::Sprite::Flip flip); 
+		olc::Sprite* Duplicate(uint32_t scale);
+		olc::Sprite* DuplicateMerge(const olc::vi2d& vPos, Sprite* pIntoSprite, Pixel blendPixel = olc::BLANK);
 		olc::vi2d Size() const;
 		std::vector<olc::Pixel> pColData;
 		Mode modeSample = Mode::NORMAL;
@@ -1016,8 +1018,6 @@ namespace olc
 		}
 
 
-
-
 		/// <summary>
 		/// Sets SIMD Instruction Set SSE4 if supported (128bit)
 		/// </summary>
@@ -1125,7 +1125,6 @@ namespace olc
 		/// <param name="vSize">Size (width, height)</param>
 		/// <returns>A pionter to a NEW duplicate Sprite</returns>
 		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vStartPos, const olc::vi2d& vSize);
-
 
 		/// <summary>
 		/// Draws the sprite to the passed draw target at the position set
@@ -2602,10 +2601,12 @@ namespace X11
 			return spr;
 		}
 
+		/*--------------------------- New Methods John Galvin -------------------------------------*/
+
 		/// <summary>
-		/// Create a flipped duplicate sprite 
+		/// Creates a duplicate Sprite that is flipped
 		/// </summary>
-		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT</param>
+		/// <param name="flip">olc::Sprite::NONE...HOZIR...VERT</param>
 		/// <returns>A pointer to a new sprite</returns>
 		olc::Sprite* Sprite::Duplicate(olc::Sprite::Flip flip)
 		{
@@ -2628,6 +2629,75 @@ namespace X11
 
 			return spr;
 		}
+
+		/// <summary>
+		/// Creates a duplicate Sprite that is Scaled
+		/// </summary>
+		/// <param name="scale">Scaler, (>= 1)</param>
+		/// <returns>A pointer to a new sprite</returns>
+		olc::Sprite* Sprite::Duplicate(uint32_t scale)
+		{
+			// Update John Galvin
+			scale = (scale < 1) ? 1 : scale;
+			olc::Sprite* spr = new olc::Sprite(width* scale, height * scale);
+
+			int32_t fxs = 0, fxm = 1, fx = 0;
+			int32_t fys = 0, fym = 1, fy = 0;
+
+			fx = fxs;
+			for (int32_t i = 0; i < width; i++, fx += fxm)
+			{
+				fy = fys;
+				for (int32_t j = 0; j < height; j++, fy += fym)
+					for (uint32_t is = 0; is < scale; is++)
+						for (uint32_t js = 0; js < scale; js++)
+							spr->SetPixel((i * scale) + is, (j * scale) + js, GetPixel(fx, fy));
+			}
+
+
+			return spr;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="vPos">Position X,Y within the IntoSprite to merge this sprite</param>
+		/// <param name="pIntoSprite">A pointer to the sprite to be merged into</param>
+		/// <param name="blendPixel">Blend Pixel (Default olc::Pixel::BLANK)</param>
+		/// <returns>A pointer to a new merge sprite</returns>
+		olc::Sprite* Sprite::DuplicateMerge(const olc::vi2d& vPos, Sprite* pIntoSprite, Pixel blendPixel)
+		{
+			// Update John Galvin
+			if (pIntoSprite == nullptr) return nullptr;
+			olc::Sprite* pMergeSprite = pIntoSprite->Duplicate();
+			olc::Pixel writePixel = blendPixel;
+
+			int32_t fxs = 0, fxm = 1, fx = 0;
+			int32_t fys = 0, fym = 1, fy = 0;
+
+
+			fx = fxs;
+			for (int32_t i = 0; i < width; i++, fx += fxm)
+			{
+				fy = fys;
+				for (int32_t j = 0; j < height; j++, fy += fym)
+				{
+					writePixel = GetPixel(fx, fy);
+					if (writePixel != blendPixel)
+					{
+						pMergeSprite->SetPixel(fx + vPos.x, fy + vPos.y, writePixel);
+
+					}
+
+				}
+
+
+			}
+
+			return pMergeSprite;
+
+		}
+
 
 		/*--------------------------- SIMD Instruction set For Sprites John Galvin -------------------------------------*/
 
@@ -3039,8 +3109,7 @@ namespace X11
 
 			default:
 				// nothing we can do, but run everything using the complier (unrolling)
-				// we need to add a scaler method to the default commands
-				return Duplicate();
+				return Duplicate(scale);
 				break;
 			}
 
@@ -3428,7 +3497,6 @@ namespace X11
 
 		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vStartPos, const olc::vi2d& vSize)
 		{
-
 
 			// Lets check if the sprite all ready exist?
 			if (bStoreSubSprite)
@@ -4677,7 +4745,7 @@ namespace X11
 			int nOffSet = nWidth % 16;
 			bool bUseHighSpeed = (nOffSet == 0) ? true : false;
 
-			__m512i  _sx, _ex, _vecRead, _blendpixel, _comparePixel, _vecTargetRead, _vecOutPut;
+			__m512i  _sx, _ex, _vecRead, _blendpixel, _vecTargetRead, _vecOutPut;
 
 
 			_blendpixel = _mm512_set1_epi32(p.n);
@@ -4984,7 +5052,7 @@ namespace X11
 
 
 
-		/*--------------------------- END SIMD Instruction set -------------------------------------*/
+		/*--------------------------- END SIMD Instruction set John Galvin-------------------------------------*/
 
 
 		olc::vi2d olc::Sprite::Size() const
@@ -7041,14 +7109,18 @@ namespace X11
 
 			if (pToSprite == nullptr) return;
 
-			olc::Sprite* pHoldDrawTarget = pDrawTarget;
-			olc::Sprite* pMergeSprite = pToSprite->Duplicate();
-			olc::Pixel writePixel = blendPixel;
-			olc::Pixel readPixel = blendPixel;
+			//olc::Sprite* pHoldDrawTarget = pDrawTarget;
+			//olc::Sprite* pMergeSprite = pToSprite->Duplicate();
+			//olc::Pixel writePixel = blendPixel;
+			//olc::Pixel readPixel = blendPixel;
+
+			olc::Sprite* pMergeSprite = nullptr;
+			olc::vi2d vToSpritePos = { vToSpritePosx, vToSpritePosy };
+
+			pMergeSprite = pFromSprite->DuplicateMerge(vToSpritePos, pToSprite, blendPixel);
 
 
-
-			SetDrawTarget(pMergeSprite);
+			/*SetDrawTarget(pMergeSprite);
 
 			int32_t fxs = 0, fxm = 1, fx = 0;
 			int32_t fys = 0, fym = 1, fy = 0;
@@ -7073,11 +7145,14 @@ namespace X11
 
 			}
 
-			SetDrawTarget(pHoldDrawTarget);
+			SetDrawTarget(pHoldDrawTarget);*/
+			if (pMergeSprite != nullptr)
+			{
+				DrawSprite(vPosx, vPosy, pMergeSprite, scale, flip);
 
-			DrawSprite(vPosx, vPosy, pMergeSprite, scale, flip);
-
-			delete pMergeSprite;
+				delete pMergeSprite;
+			}
+			
 
 
 		}

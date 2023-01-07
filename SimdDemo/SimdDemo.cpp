@@ -32,6 +32,7 @@ public:
 	/* Sprites */
 	olc::Sprite* sprMrIcey = nullptr;
 	olc::Sprite* sprMrIceyVERT = nullptr;
+	olc::Sprite* sprMrIceyScale = nullptr;
 	olc::Sprite* sprMrSmiley = nullptr;
 	olc::Sprite* sprSpriteSheet = nullptr;
 	olc::Sprite* sprSpriteSheetVERT = nullptr;
@@ -199,13 +200,9 @@ public:
 		SetDrawTarget(nLayerDrawSprite);
 		Clear_SIMD(olc::BLANK);
 
-		
 		//
 		SetDrawTarget(nLayerDrawPartialSprite);
 		Clear_SIMD(olc::BLANK);
-		/*DrawPartialSprite_SIMD({ 300, 60 }, sprMrIcey, { 50, 50 }, { 80,80 }, 1, olc::Sprite::NONE);
-		DrawPartialSprite_SIMD({ 300, 200 }, sprMrIcey, { 50, 50 }, { 80,80 }, 2, olc::Sprite::HORIZ);*/
-		
 
 		// merge!!
 		SetDrawTarget(nLayerDrawMergeSprite);
