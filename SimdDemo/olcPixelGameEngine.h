@@ -1128,13 +1128,13 @@ namespace olc
 
 
 		/// <summary>
-		/// Draws the passed sprite to a draw target at the position set
+		/// Draws the sprite to the passed draw target at the position set
 		/// This method is usually called from the Sprite Class with 'Store Sub Sprites' is enabled
 		/// </summary>
 		/// <param name="vPos">Start position (x,y)</param>
 		/// <param name="pdrawTarget">A Pointer to the draw target</param>
-		/// <returns>A pointer to the draw target (Auto memory Managed)</returns>
-		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget);
+		/// <returns>A pointer to the draw target</returns>
+		olc::Sprite* DrawToTarget_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget);
 
 		/// <summary>
 		/// Draws a duplicate Sprite that is flipped and draws it to draw target
@@ -1142,8 +1142,8 @@ namespace olc
 		/// <param name="vPos">Start position in the draw target (x,y)</param>
 		/// <param name="pdrawTarget">A pointer to the draw target</param>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT</param>
-		/// <returns>A pointer to the draw target (Auto memory Managed)</returns>
-		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, uint8_t flip);
+		/// <returns>A pointer to the draw target</returns>
+		olc::Sprite* DrawToTarget_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, uint8_t flip);
 
 		/// <summary>
 		/// Draws a scaled duplicate Sprite that is flipped and draws it to draw target
@@ -1152,8 +1152,8 @@ namespace olc
 		/// <param name="pdrawTarget">A pointer to the draw target</param>
 		/// <param name="scale">Scaler (>= 1)</param>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT</param>
-		/// <returns>A pointer to the draw target (Auto memory Managed)</returns>
-		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip);
+		/// <returns>A pointer to the draw target</returns>
+		olc::Sprite* DrawToTarget_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip);
 
 
 		/// <summary>
@@ -1165,8 +1165,8 @@ namespace olc
 		/// <param name="vSize">Size (width, height)</param>
 		/// <param name="scale">Scaler value (>= 1) (Default 1)</param>
 		/// <param name="flip">olc::Sprite::NONE.. HORIZ.. VERT; (default NONE)</param>
-		/// <returns>A pointer to the draw target (Auto memory Managed)</returns>
-		olc::Sprite* Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, const olc::vi2d& vStartPos, const olc::vi2d& vSize, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
+		/// <returns>A pointer to the draw target</returns>
+		olc::Sprite* DrawToTarget_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, const olc::vi2d& vStartPos, const olc::vi2d& vSize, uint32_t scale = 1, olc::Sprite::Flip flip = olc::Sprite::NONE);
 
 		/// <summary>
 		/// Creates a new dublicate sprite that is merge with the passed in sprite
@@ -1174,7 +1174,7 @@ namespace olc
 		/// <param name="vTargetPos">Start position (x,y)</param>
 		/// <param name="pSprite">A pointer to the sprite that is to be merge with this sprite</param>
 		/// <param name="p">Blend Pixel, this is the pixel color in the pSrite that is not to be merge, (Default olc::BLANK)</param>
-		/// <returns></returns>
+		/// <returns>A pointer to the NEW merge sprite</returns>
 		olc::Sprite* DuplicateMerge_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pTargetSprite, olc::Pixel p = olc::BLANK);
 
 		/// <summary>
@@ -1312,33 +1312,33 @@ namespace olc
 
 		/// <summary>
 		/// Draws a duplicate sprite to the draw target, using SSE (128bit) Instruction Set
-		/// DO NOT CALL DIRECTY: Use Duplicate_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget)
+		/// DO NOT CALL DIRECTY: Use DrawToTarget_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget)
 		/// </summary>
 		/// <param name="vPos">Start position in the draw target (x,y)</param>
 		/// <param name="pdrawTarget">A pointer to the drawtarget</param>
 		/// <param name="vecPositions">Position Vector that is used to crop the sprite if out of bounds</param>
 		/// <returns>A pointer to the draw target</returns>
-		olc::Sprite* Duplicate_SSE(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions);
+		olc::Sprite* DrawToTarget_SSE(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions);
 
 		/// <summary>
 		/// Draws a duplicate sprite to the draw target, using AVX (256bit) Instruction Set
-		/// DO NOT CALL DIRECTY: Use Duplicate_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget)
+		/// DO NOT CALL DIRECTY: Use DrawToTarget_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget)
 		/// </summary>
 		/// <param name="vPos">Start position in the draw target (x,y)</param>
 		/// <param name="pdrawTarget">A pointer to the drawtarget</param>
 		/// <param name="vecPositions">Position Vector that is used to crop the sprite if out of bounds</param>
 		/// <returns>A pointer to the draw target</returns>
-		olc::Sprite* Duplicate_AVX256(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions);
+		olc::Sprite* DrawToTarget_AVX256(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions);
 
 		/// <summary>
 		/// Draws a duplicate sprite to the draw target, using AVX512 (512bit) Instruction Set
-		/// DO NOT CALL DIRECTY: Use Duplicate_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget)
+		/// DO NOT CALL DIRECTY: Use DrawToTarget_SIMD(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget)
 		/// </summary>
 		/// <param name="vPos">Start position in the draw target (x,y)</param>
 		/// <param name="pdrawTarget">A pointer to the drawtarget</param>
 		/// <param name="vecPositions">Position Vector that is used to crop the sprite if out of bounds</param>
 		/// <returns>A pointer to the draw target</returns>
-		olc::Sprite* Duplicate_AVX512(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions);
+		olc::Sprite* DrawToTarget_AVX512(const olc::vi2d& vTargetPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions);
 
 		/*------------------------------------------------------------------------------------------------------------------------*/
 
@@ -3858,7 +3858,7 @@ namespace X11
 
 		/*--------------------------------------------------------------------------------------*/
 
-		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget)
+		olc::Sprite* Sprite::DrawToTarget_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget)
 		{
 			// NOTE: This method is used soley to draw to the draw target
 
@@ -3953,18 +3953,18 @@ namespace X11
 
 			case SIMD_AVX:
 			case SIMD_AVX2:
-				return Duplicate_AVX256(vPos, pdrawTarget, vecPositions);
+				return DrawToTarget_AVX256(vPos, pdrawTarget, vecPositions);
 				break;
 
 			case SIMD_SSE:
 			case SIMD_SSE2:
 			case SIMD_SSE3:
 			case SIMD_SSE41:
-				return Duplicate_SSE(vPos, pdrawTarget, vecPositions);
+				return DrawToTarget_SSE(vPos, pdrawTarget, vecPositions);
 				break;
 
 			case SIMD_AVX512:
-				return Duplicate_AVX512(vPos, pdrawTarget, vecPositions);
+				return DrawToTarget_AVX512(vPos, pdrawTarget, vecPositions);
 				break;
 
 			default:
@@ -3976,7 +3976,7 @@ namespace X11
 
 		}
 
-		olc::Sprite* Sprite::Duplicate_SSE(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions)
+		olc::Sprite* Sprite::DrawToTarget_SSE(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions)
 		{
 			// Create ints to represent the vector positions
 			// makes life easier for debugging and creation of the for loop for SIMD
@@ -4076,7 +4076,7 @@ namespace X11
 
 		}
 
-		olc::Sprite* Sprite::Duplicate_AVX256(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions)
+		olc::Sprite* Sprite::DrawToTarget_AVX256(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions)
 		{
 
 			// Create ints to represent the vector positions
@@ -4180,7 +4180,7 @@ namespace X11
 
 		}
 
-		olc::Sprite* Sprite::Duplicate_AVX512(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions)
+		olc::Sprite* Sprite::DrawToTarget_AVX512(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, std::vector<int> vecPositions)
 		{
 			// Create ints to represent the vector positions
 			// makes life easier for debugging and creation of the for loop for SIMD
@@ -4755,9 +4755,7 @@ namespace X11
 		/*--------------------------------------------------------------------------------------*/
 
 
-
-
-		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint8_t flip)
+		olc::Sprite* Sprite::DrawToTarget_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint8_t flip)
 		{
 			olc::vi2d vStartPos = { 0,0 };
 			uint32_t scale = 1;
@@ -4770,7 +4768,7 @@ namespace X11
 				olc::Sprite* spr = GetStoredSubSprite(vStartPos, vScaleSize, scale, (olc::Sprite::Flip)flip);
 				if (spr != nullptr)
 				{
-					spr->Duplicate_SIMD(vPos, pdrawTarget);
+					spr->DrawToTarget_SIMD(vPos, pdrawTarget);
 					return pdrawTarget;
 				}
 
@@ -4781,7 +4779,7 @@ namespace X11
 			olc::Sprite* sprFlipped = this->Duplicate_SIMD((olc::Sprite::Flip)flip);
 
 			// Draw the Sprite to the draw target at the position requested
-			sprFlipped->Duplicate_SIMD(vPos, pdrawTarget);
+			sprFlipped->DrawToTarget_SIMD(vPos, pdrawTarget);
 			if (bStoreSubSprite)
 			{
 				olc::vi2d vSize = { sprFlipped->width, sprFlipped->height };
@@ -4801,7 +4799,7 @@ namespace X11
 
 		/*--------------------------------------------------------------------------------------*/
 
-		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip)
+		olc::Sprite* Sprite::DrawToTarget_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, uint32_t scale, uint8_t flip)
 		{
 
 			// Lets check if the sprite all ready exist?
@@ -4812,7 +4810,7 @@ namespace X11
 				olc::Sprite* spr = GetStoredSubSprite(vStartPos, vScaleSize, scale, (olc::Sprite::Flip)flip);
 				if (spr != nullptr)
 				{
-					spr->Duplicate_SIMD(vPos, pdrawTarget);
+					spr->DrawToTarget_SIMD(vPos, pdrawTarget);
 					return pdrawTarget;
 				}
 			}
@@ -4825,7 +4823,7 @@ namespace X11
 
 
 			// Draw the Sprite to the draw target at the position requested
-			sprScaled->Duplicate_SIMD(vPos, pdrawTarget);
+			sprScaled->DrawToTarget_SIMD(vPos, pdrawTarget);
 			if (bStoreSubSprite)
 			{
 				olc::vi2d vStartPos = { 0,0 };
@@ -4842,7 +4840,7 @@ namespace X11
 
 		}
 
-		olc::Sprite* Sprite::Duplicate_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, const olc::vi2d& vStartPos, const olc::vi2d& vSize, uint32_t scale, olc::Sprite::Flip flip)
+		olc::Sprite* Sprite::DrawToTarget_SIMD(const olc::vi2d& vPos, olc::Sprite* pdrawTarget, const olc::vi2d& vStartPos, const olc::vi2d& vSize, uint32_t scale, olc::Sprite::Flip flip)
 		{
 
 			// Lets check if the sprite all ready exist?
@@ -4853,7 +4851,7 @@ namespace X11
 				olc::Sprite* spr = GetStoredSubSprite(vStartPos, vScaleSize, scale, flip);
 				if (spr != nullptr)
 				{
-					spr->Duplicate_SIMD(vPos, pdrawTarget);
+					spr->DrawToTarget_SIMD(vPos, pdrawTarget);
 					return pdrawTarget;
 				}
 			}
@@ -4870,10 +4868,9 @@ namespace X11
 
 
 			// Draw the Sprite to the draw target at the position requested
-			sprScaled->Duplicate_SIMD(vPos, pdrawTarget);
+			sprScaled->DrawToTarget_SIMD(vPos, pdrawTarget);
 			if (bStoreSubSprite)
 			{
-				// TODO: John Galvin: Needs to be moved to a method
 				StoreSubSprite(sprScaled, vStartPos, scale, flip);
 			}
 			else
@@ -6077,12 +6074,12 @@ namespace X11
 			// then we just call sprite->Duplicate_SIMD({ x , y }, pDrawTarget, scale, flip), this will take care of everything for us
 			if (sprite->getStoreSubSprites() || scale > 1)
 			{
-				sprite->Duplicate_SIMD({ x , y }, pDrawTarget, scale, flip);
+				sprite->DrawToTarget_SIMD({ x , y }, pDrawTarget, scale, flip);
 			}
 			else
 			{
 				// Note this method is not able to store sprites
-				sprite->Duplicate_SIMD({ x , y }, pDrawTarget, flip);
+				sprite->DrawToTarget_SIMD({ x , y }, pDrawTarget, flip);
 			}
 
 
@@ -6118,7 +6115,7 @@ namespace X11
 			olc::vi2d vPos = { x, y };
 			olc::vi2d vStartPos = { ox, oy };
 			olc::vi2d vSize = { w, h };
-			sprite->Duplicate_SIMD(vPos, pDrawTarget, vStartPos, vSize, scale, (olc::Sprite::Flip)flip);
+			sprite->DrawToTarget_SIMD(vPos, pDrawTarget, vStartPos, vSize, scale, (olc::Sprite::Flip)flip);
 
 		}
 
@@ -6174,11 +6171,11 @@ namespace X11
 
 			if (scale > 1)
 			{
-				pMergeSprite->Duplicate_SIMD(vPos, pDrawTarget, scale, flip);
+				pMergeSprite->DrawToTarget_SIMD(vPos, pDrawTarget, scale, flip);
 			}
 			else
 			{
-				pMergeSprite->Duplicate_SIMD(vPos, pDrawTarget, flip);
+				pMergeSprite->DrawToTarget_SIMD(vPos, pDrawTarget, flip);
 
 			}
 
