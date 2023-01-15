@@ -476,6 +476,10 @@ int main()
 #include <array>
 #include <cstring>
 #include <intrin.h> // John Galvin
+#if defined (_M_ARM64) || defined(_M_HYBRID_X86_ARM64) || defined(_M_ARM64EC)
+#include <arm64_neon.h> // John Galvin ARM NEON Advance SIMD Support
+#endif  /* defined (_M_ARM64) || defined(_M_HYBRID_X86_ARM64) || defined(_M_ARM64EC) */
+
 #pragma endregion
 
 #define PGE_VER 223
