@@ -6348,8 +6348,14 @@ namespace X11
 				return;
 			}
 
+			// Crop line to fit within draw target
+			ny = (ny < 0) ? 0 : ny;
+			sx = (sx < 0) ? 0 : sx;
+			ex = (ex > GetDrawTarget()->width) ? ex = GetDrawTarget()->width : ex;
+
 			int i = 0;
 			int* pTargetVector = (int*)pDrawTarget->pColData.data();
+			size_t nTargetLength = pDrawTarget->pColData.size();
 
 			int nVecA = (ny * GetDrawTargetWidth()) + sx;
 			pTargetVector += nVecA;
@@ -6362,8 +6368,9 @@ namespace X11
 			_ex = _mm_set1_epi32(ex);
 			_result = _mm_set1_epi32(-1);
 
-			for (i = sx; i <= ex; i += 4, pTargetVector += 4)
+			for (i = sx; i <= ex; i += 4, pTargetVector += 4, nVecA += 4)
 			{
+				if (nVecA > nTargetLength) break;
 				_sx = _mm_set_epi32(i + 3, i + 2, i + 1, i);
 				// Take note there is 'no less than or equals', but if you just revverse the operands and use 'greater than'
 				// you get the excat same affect
@@ -6384,8 +6391,14 @@ namespace X11
 				return;
 			}
 
+			// Crop line to fit within draw target
+			ny = (ny < 0) ? 0 : ny; 
+			sx = (sx < 0) ? 0 : sx;
+			ex = (ex > GetDrawTarget()->width) ? ex = GetDrawTarget()->width : ex;
+
 			int i = 0;
 			int* pTargetVector = (int*)pDrawTarget->pColData.data();
+			size_t nTargetLength = pDrawTarget->pColData.size();
 
 			int nVecA = (ny * GetDrawTargetWidth()) + sx;
 			pTargetVector += nVecA;
@@ -6399,8 +6412,9 @@ namespace X11
 			_ex = _mm256_set1_epi32(ex);
 			_result = _mm256_set1_epi32(-1);
 
-			for (i = sx; i <= ex; i += 8, pTargetVector += 8)
+			for (i = sx; i <= ex; i += 8, pTargetVector += 8, nVecA += 8)
 			{
+				if (nVecA > nTargetLength) break;
 				_sx = _mm256_set_epi32(i + 7, i + 6, i + 5, i + 4, i + 3, i + 2, i + 1, i);
 				// Take note there is 'no less than or equals', but if you just revverse the operands and use 'greater than'
 				// you get the excat same affect
@@ -6422,8 +6436,14 @@ namespace X11
 				return;
 			}
 
+			// Crop line to fit within draw target
+			ny = (ny < 0) ? 0 : ny;
+			sx = (sx < 0) ? 0 : sx;
+			ex = (ex > GetDrawTarget()->width) ? ex = GetDrawTarget()->width : ex;
+
 			int i = 0;
 			int* pTargetVector = (int*)pDrawTarget->pColData.data();
+			size_t nTargetLength = pDrawTarget->pColData.size();
 
 			int nVecA = (ny * GetDrawTargetWidth()) + sx;
 			pTargetVector += nVecA;
@@ -6438,6 +6458,7 @@ namespace X11
 
 			for (i = sx; i <= ex; i += 16, pTargetVector += 16)
 			{
+				if (nVecA > nTargetLength) break;
 				_sx = _mm512_set_epi32(i + 15, i + 14, i + 13, i + 12, i + 11, i + 10, i + 9, i + 8, i + 7, i + 6, i + 5, i + 4, i + 3, i + 2, i + 1, i);
 
 				_mm512_mask_store_epi32(pTargetVector, _mm512_cmpge_epi32_mask(_ex, _sx), _setpixel);
