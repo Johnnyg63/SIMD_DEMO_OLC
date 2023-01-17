@@ -1760,8 +1760,8 @@ namespace olc
 			AVX = 5, // Use AVX (256bit) Instruction Set
 			AVX2 = 6, // Use AVX2 (256bit) Instruction Set
 			AVX512 = 7,// Use AVX512 (512bit) Instruction Set
-			ARM = 8, // Not Implemented coming soon
-			NEON = 9 // Not Implemented coming soon
+			ARM_NEON = 8, // Not Implemented coming soon
+			
 
 		};
 
@@ -1994,7 +1994,7 @@ namespace olc
 		/// </summary>
 		/// <param name="VecStartIndex">pColdata start</param>
 		/// <param name="VecEndIndex">pColdata end</param>
-		/// <param name="p">pixel</param>
+		/// <param name="p">pixel colour (Default OLC::BLANK)</param>
 		void Clear_SSE(int VecStartIndex, int VecEndIndex, Pixel p = olc::BLANK);
 
 		/// <summary>
@@ -2002,7 +2002,7 @@ namespace olc
 		/// </summary>
 		/// <param name="VecStartIndex">pColdata start</param>
 		/// <param name="VecEndIndex">pColdata end</param>
-		/// <param name="p">pixel</param>
+		/// <param name="p">pixel colour (Default OLC::BLANK)</param>
 		void Clear_AVX256(int VecStartIndex, int VecEndIndex, Pixel p = olc::BLANK);
 
 		/// <summary>
@@ -2010,8 +2010,16 @@ namespace olc
 		/// </summary>
 		/// <param name="VecStartIndex">pColdata start</param>
 		/// <param name="VecEndIndex">pColdata end</param>
-		/// <param name="p">pixel</param>
+		/// <param name="p">pixel colour (Default OLC::BLANK)</param>
 		void Clear_AVX512(int VecStartIndex, int VecEndIndex, Pixel p = olc::BLANK);
+
+		/// <summary>
+		/// DO NOT CALL DIRECTLY: Use Clear_SIMD(), clears a target to the passed pixel colour using ARM NEON Advance SIMD instruction set
+		/// </summary>
+		/// <param name="VecStartIndex">pColdata start</param>
+		/// <param name="VecEndIndex">pColdata end</param>
+		/// <param name="p">pixel colour (Default OLC::BLANK)</param>
+		void Clear_ARM_NEON(int VecStartIndex, int VecEndIndex, Pixel p = olc::BLANK);
 
 		/// <summary>
 		/// DO NOT CALL DIRECTLY: Draws a line using SIMD 
@@ -5712,7 +5720,7 @@ namespace X11
 			{
 			case PixelGameEngine::AVX:
 			case PixelGameEngine::AVX2:
-				// AVX mm256 hold 8 ints
+				// AVX 256bit hold 8 ints
 				// we need to check if there is enough data to fill the regsiter
 				if (VecEndIndex - VecStartIndex > 7)
 				{
@@ -5727,7 +5735,7 @@ namespace X11
 			case PixelGameEngine::SSE2:
 			case PixelGameEngine::SSE3:
 			case PixelGameEngine::SSE41:
-				// AVX mm128 hold 4 ints
+				// SEE 128bit hold 4 ints
 				if (VecEndIndex - VecStartIndex > 3)
 				{
 					nTempVecEnd = VecEndIndex / 4;
@@ -5737,8 +5745,7 @@ namespace X11
 				break;
 
 			case PixelGameEngine::AVX512:
-				// AVX mm512 hold 16 ints
-				// AVX mm128 hold 4 ints
+				// AVX512 512bit hold 16 ints
 				if (VecEndIndex - VecStartIndex > 15)
 				{
 					nTempVecEnd = VecEndIndex / 16;
@@ -5747,7 +5754,15 @@ namespace X11
 				}
 
 				break;
-
+			case PixelGameEngine::ARM_NEON:
+				// SEE 128bit hold 4 ints
+				if (VecEndIndex - VecStartIndex > 3)
+				{
+					nTempVecEnd = VecEndIndex / 4;
+					nTempVecEnd = nTempVecEnd * 4;
+					Clear_ARM_NEON(VecStartIndex, nTempVecEnd, p);
+				}
+				break;
 			default:
 				// nothing we can do, but run everything using the complier (unrolling)
 				nTempVecEnd = VecStartIndex;
@@ -5877,6 +5892,11 @@ namespace X11
 
 
 			}
+		}
+
+		void PixelGameEngine::Clear_ARM_NEON(int VecStartIndex, int VecEndIndex, Pixel p = olc::BLANK)
+		{
+
 		}
 
 		bool PixelGameEngine::Draw_SIMD(int32_t sx, int32_t ex, int32_t y, Pixel p)
